@@ -1,0 +1,195 @@
+<!--
+  login.component.html — Login Page Template
+
+  Clean, centered dark-mode login form with:
+  - Email + Password inputs with icons
+  - Password visibility toggle
+  - Loading state button
+  - API error banner
+  - Links to Register and Forgot Password
+-->
+
+<main class="auth-page login-page" id="login-page">
+
+  <!-- Left brand panel (desktop only) -->
+  <section class="auth-brand" aria-hidden="true">
+    <div class="brand-logo">
+      <img src="assets/images/logo.png" alt="ShopWave Logo" class="logo-img" loading="eager" />
+    </div>
+    <div class="brand-copy">
+      <h1 class="brand-title">
+        Welcome<br>
+        <span class="brand-accent">Back!</span>
+      </h1>
+      <p class="brand-subtitle">
+        Sign in to access your orders, wishlist, and exclusive member deals.
+      </p>
+    </div>
+    <div class="orb orb-1" aria-hidden="true"></div>
+    <div class="orb orb-2" aria-hidden="true"></div>
+  </section>
+
+  <!-- Login form card -->
+  <section class="form-section">
+    <div class="auth-card login-card">
+
+      <!-- Header -->
+      <header class="card-header">
+        <div class="mobile-logo" aria-hidden="true">
+          <img src="assets/images/logo.png" alt="ShopWave" class="mobile-logo-img" />
+        </div>
+        <h2 class="card-title">Sign In</h2>
+        <p class="card-subtitle text-muted">Enter your credentials to continue</p>
+      </header>
+
+      <!-- API Error Alert -->
+      <div
+        *ngIf="apiError"
+        class="alert alert-error"
+        role="alert"
+        aria-live="polite"
+        id="login-error-banner"
+      >
+        <span class="material-icons" aria-hidden="true">error_outline</span>
+        <span>{{ apiError }}</span>
+      </div>
+
+      <!-- Login Form -->
+      <form
+        [formGroup]="loginForm"
+        (ngSubmit)="onSubmit()"
+        novalidate
+        id="login-form"
+        autocomplete="on"
+      >
+
+        <!-- Email -->
+        <div class="form-group">
+          <label class="form-label" for="login-email">Email Address</label>
+          <div class="input-wrapper">
+            <span class="input-icon material-icons" aria-hidden="true">email</span>
+            <input
+              id="login-email"
+              type="email"
+              class="form-control"
+              [class.is-invalid]="isFieldInvalid('email')"
+              [class.is-valid]="isFieldValid('email')"
+              formControlName="email"
+              placeholder="rohit@example.com"
+              autocomplete="email"
+              aria-required="true"
+              [attr.aria-invalid]="isFieldInvalid('email')"
+              aria-describedby="login-email-error"
+            />
+          </div>
+          <span
+            *ngIf="isFieldInvalid('email')"
+            class="field-error"
+            id="login-email-error"
+            role="alert"
+          >
+            <span class="material-icons" aria-hidden="true">info</span>
+            {{ getFieldError('email') }}
+          </span>
+        </div>
+
+        <!-- Password -->
+        <div class="form-group">
+          <div class="password-label-row">
+            <label class="form-label" for="login-password">Password</label>
+          </div>
+          <div class="input-wrapper has-right-icon">
+            <span class="input-icon material-icons" aria-hidden="true">lock</span>
+            <input
+              id="login-password"
+              [type]="showPassword ? 'text' : 'password'"
+              class="form-control"
+              [class.is-invalid]="isFieldInvalid('password')"
+              [class.is-valid]="isFieldValid('password')"
+              formControlName="password"
+              placeholder="Your password"
+              autocomplete="current-password"
+              aria-required="true"
+              [attr.aria-invalid]="isFieldInvalid('password')"
+              aria-describedby="login-password-error"
+            />
+            <button
+              type="button"
+              class="input-icon-right"
+              (click)="showPassword = !showPassword"
+              [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'"
+              id="toggle-login-password"
+            >
+              <span class="material-icons">{{ showPassword ? 'visibility_off' : 'visibility' }}</span>
+            </button>
+          </div>
+          <span
+            *ngIf="isFieldInvalid('password')"
+            class="field-error"
+            id="login-password-error"
+            role="alert"
+          >
+            <span class="material-icons" aria-hidden="true">info</span>
+            {{ getFieldError('password') }}
+          </span>
+        </div>
+
+        <!-- Submit -->
+        <button
+          type="submit"
+          class="btn btn-primary"
+          id="login-submit-btn"
+          [disabled]="isLoading"
+          [attr.aria-busy]="isLoading"
+        >
+          <span *ngIf="!isLoading">
+            Sign In
+            <span class="material-icons btn-icon" aria-hidden="true">login</span>
+          </span>
+          <span *ngIf="isLoading" class="loading-state" aria-label="Signing in...">
+            <span class="spinner" aria-hidden="true"></span>
+            Signing in...
+          </span>
+        </button>
+
+      </form>
+
+      <!-- Footer -->
+      <footer class="card-footer text-center">
+        <p class="text-sm text-muted">
+          Don't have an account?
+          <a routerLink="/register" id="go-to-register" class="link-accent">Create one</a>
+        </p>
+
+        <!-- Admin Demo Account Callout -->
+        <div class="admin-hint-card" id="admin-credentials-banner">
+          <div class="admin-hint-header">
+            <span class="material-icons admin-hint-icon" aria-hidden="true">admin_panel_settings</span>
+            <span class="admin-hint-title">Admin Demo Account</span>
+          </div>
+          <div class="admin-hint-credentials">
+            <div class="credential-item">
+              <span class="credential-label">ID / Email:</span>
+              <code class="credential-value">admin@shopwave.com</code>
+            </div>
+            <div class="credential-item">
+              <span class="credential-label">Password:</span>
+              <code class="credential-value">admin123456</code>
+            </div>
+          </div>
+          <button
+            type="button"
+            class="btn-fill-admin"
+            (click)="fillAdminCredentials()"
+            id="fill-admin-btn"
+          >
+            <span class="material-icons" aria-hidden="true">auto_fix_high</span>
+            Auto-fill Admin Credentials
+          </button>
+        </div>
+      </footer>
+
+    </div>
+  </section>
+
+</main>

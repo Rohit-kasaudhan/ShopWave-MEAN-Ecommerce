@@ -1,0 +1,180 @@
+<div class="admin-section">
+  <!-- Controls Header -->
+  <div class="section-header">
+    <div class="section-meta">
+      <span class="section-count">{{ filteredOrders.length }} of {{ orders.length }} Orders</span>
+    </div>
+
+    <div class="header-controls">
+      <div class="search-box">
+        <span class="material-icons search-icon">search</span>
+        <input
+          type="text"
+          placeholder="Search order ID, customer, city..."
+          [(ngModel)]="searchQuery"
+          (ngModelChange)="applyFilter()"
+          class="search-input"
+        />
+      </div>
+
+      <select [(ngModel)]="selectedStatusFilter" (ngModelChange)="applyFilter()" class="status-filter-select">
+        <option value="all">All Statuses</option>
+        <option *ngFor="let s of statuses" [value]="s">{{ s | titlecase }}</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-state" *ngIf="isLoading">
+    <div class="spinner" style="width:40px;height:40px;border-width:3px"></div>
+  </div>
+
+  <!-- Table View -->
+  <div class="table-wrapper" *ngIf="!isLoading">
+    <table class="admin-table" *ngIf="filteredOrders.length > 0">
+      <thead>
+        <tr>
+          <th>Order Reference</th>
+          <th>Customer</th>
+          <th>Date</th>
+          <th>Items</th>
+          <th>Total</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let o of filteredOrders" class="order-row">
+          <td class="uuid-cell" (click)="openOrderDetail(o)">
+            <span class="order-id">#{{ o.uuid | slice:0:8 }}</span>
+          </td>
+          <td>
+            <div class="customer-info">
+              <span class="customer-name">{{ o.user?.FirstName }} {{ o.user?.LastName }}</span>
+              <span class="customer-email">{{ o.user?.email || o.shippingAddress?.phone }}</span>
+            </div>
+          </td>
+          <td>
+            <div class="date-cell">
+              <span>{{ o.createdAt | date:'mediumDate' }}</span>
+              <span class="time-sub">{{ o.createdAt | date:'shortTime' }}</span>
+            </div>
+          </td>
+          <td>
+            <span class="items-count">{{ o.items?.length || 0 }} items</span>
+          </td>
+          <td class="price-cell">${{ o.totalPrice | number:'1.2-2' }}</td>
+          <td>
+            <select
+              class="status-dropdown"
+              [style.color]="getStatusColor(o.status)"
+              [value]="o.status"
+              (change)="updateStatus(o, $any($event.target).value)"
+            >
+              <option *ngFor="let s of statuses" [value]="s" style="color:#000">
+                {{ s | titlecase }}
+              </option>
+            </select>
+          </td>
+          <td class="actions-cell">
+            <button class="btn-inspect" (click)="openOrderDetail(o)" title="Inspect Order Details">
+              <span class="material-icons">visibility</span>
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="empty-state" *ngIf="filteredOrders.length === 0">
+      <span class="material-icons empty-icon">receipt_long</span>
+      <p>No orders matching search or status filter.</p>
+    </div>
+  </div>
+
+  <!-- Order Details Inspector Modal -->
+  <div class="form-overlay" *ngIf="selectedOrder" (click)="closeOrderDetail()">
+    <div class="form-panel order-modal" (click)="$event.stopPropagation()">
+      <div class="form-header">
+        <div class="modal-title-group">
+          <h3>Order Details: #{{ selectedOrder.uuid }}</h3>
+          <span class="status-badge-inline" [style.color]="getStatusColor(selectedOrder.status)">
+            ● {{ selectedOrder.status | uppercase }}
+          </span>
+        </div>
+        <button class="btn-close" (click)="closeOrderDetail()">
+          <span class="material-icons">close</span>
+        </button>
+      </div>
+
+      <div class="modal-body-content">
+        <!-- Summary Cards Row -->
+        <div class="summary-cards-row">
+          <div class="info-card">
+            <span class="info-label">Customer Info</span>
+            <span class="info-main">{{ selectedOrder.user?.FirstName }} {{ selectedOrder.user?.LastName }}</span>
+            <span class="info-sub">{{ selectedOrder.user?.email }}</span>
+          </div>
+
+          <div class="info-card">
+            <span class="info-label">Shipping Details</span>
+            <span class="info-main">{{ selectedOrder.shippingAddress?.street || selectedOrder.shippingAddress?.address }}</span>
+            <span class="info-sub">{{ selectedOrder.shippingAddress?.city }}, {{ selectedOrder.shippingAddress?.postalCode }}</span>
+            <span class="info-sub" *ngIf="selectedOrder.shippingAddress?.phone">Phone: {{ selectedOrder.shippingAddress?.phone }}</span>
+          </div>
+
+          <div class="info-card">
+            <span class="info-label">Payment & Date</span>
+            <span class="info-main">${{ selectedOrder.totalPrice | number:'1.2-2' }}</span>
+            <span class="info-sub">Method: {{ selectedOrder.paymentMethod | uppercase }}</span>
+            <span class="info-sub">Placed: {{ selectedOrder.createdAt | date:'medium' }}</span>
+          </div>
+        </div>
+
+        <!-- Items Table -->
+        <div class="items-section">
+          <h4>Purchased Items</h4>
+          <div class="items-table-wrapper">
+            <table class="modal-items-table">
+              <thead>
+                <tr>
+                  <th>Product</th>
+                  <th>Unit Price</th>
+                  <th>Quantity</th>
+                  <th>Subtotal</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let item of selectedOrder.items">
+                  <td>
+                    <div class="item-cell">
+                      <img [src]="getItemImage(item)" [alt]="getItemName(item)" class="item-thumb" />
+                      <span class="item-name">{{ getItemName(item) }}</span>
+                    </div>
+                  </td>
+                  <td>${{ item.price | number:'1.2-2' }}</td>
+                  <td>x{{ item.quantity || item.qty || 1 }}</td>
+                  <td class="price-cell">${{ (item.price * (item.quantity || item.qty || 1)) | number:'1.2-2' }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Status Change Footer -->
+        <div class="order-status-footer">
+          <label>Update Order Status:</label>
+          <div class="status-btn-group">
+            <button
+              *ngFor="let s of statuses"
+              class="status-btn"
+              [class.active]="selectedOrder.status === s"
+              (click)="updateStatus(selectedOrder, s)"
+            >
+              {{ s | titlecase }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

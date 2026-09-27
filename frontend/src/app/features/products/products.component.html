@@ -1,0 +1,383 @@
+<div class="products-page">
+  <!-- ── Page Header ─────────────────────────────── -->
+  <div class="page-header">
+    <div class="header-badge">
+      <span class="material-icons">storefront</span>
+      <span>ShopWave Catalog</span>
+    </div>
+    <h1 class="page-title">
+      Explore Our <span class="gradient-text">Premium Catalog</span>
+    </h1>
+    <p class="page-subtitle">
+      Showing <strong>{{ paginatedProducts.length }}</strong> of <strong>{{ filteredProducts.length }}</strong> matching products
+    </p>
+
+    <!-- ── Quick Category Horizontal Pill Bar ──────── -->
+    <div class="category-pill-bar">
+      <button
+        class="pill-item"
+        [class.active]="selectedCategory === ''"
+        (click)="onCategoryChange('')"
+      >
+        <span>All Products</span>
+        <span class="pill-badge">{{ allProducts.length }}</span>
+      </button>
+
+      <button
+        class="pill-item"
+        *ngFor="let cat of categories"
+        [class.active]="selectedCategory === cat._id || selectedCategory === cat.uuid"
+        (click)="onCategoryChange(cat._id)"
+      >
+        <span>{{ cat.name }}</span>
+        <span class="pill-badge">{{ getCategoryProductCount(cat._id) }}</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ── Control Bar: Mobile Filter Button, Sorting & View Toggle ───── -->
+  <div class="catalog-control-bar">
+    <!-- Left: Mobile Filter Drawer Trigger & Filter Chips -->
+    <div class="left-controls">
+      <button class="btn-mobile-filter" (click)="toggleMobileFilter()">
+        <span class="material-icons">filter_list</span>
+        <span>Filter & Refine</span>
+        <span class="badge-count" *ngIf="getActiveFilterCount() > 0">{{ getActiveFilterCount() }}</span>
+      </button>
+
+      <!-- Active Filter Chips -->
+      <div class="active-filters-chips">
+        <span class="chip-label" *ngIf="getActiveFilterCount() > 0">Filters:</span>
+
+        <span class="filter-chip" *ngIf="searchControl.value">
+          "{{ searchControl.value }}"
+          <button (click)="searchControl.setValue('')" class="chip-remove">✕</button>
+        </span>
+
+        <span class="filter-chip" *ngIf="selectedCategory">
+          {{ getCategoryName(selectedCategory) }}
+          <button (click)="onCategoryChange('')" class="chip-remove">✕</button>
+        </span>
+
+        <span class="filter-chip" *ngIf="inStockOnly">
+          In Stock Only
+          <button (click)="toggleInStockOnly()" class="chip-remove">✕</button>
+        </span>
+
+        <span class="filter-chip" *ngIf="minPrice !== null || maxPrice !== null">
+          ${{ minPrice || 0 }} - ${{ maxPrice || 'Any' }}
+          <button (click)="setPricePreset('', null, null)" class="chip-remove">✕</button>
+        </span>
+
+        <span class="filter-chip" *ngIf="selectedRating > 0">
+          {{ selectedRating }}★ & Above
+          <button (click)="setRatingFilter(0)" class="chip-remove">✕</button>
+        </span>
+
+        <button class="btn-clear-all" *ngIf="getActiveFilterCount() > 0" (click)="clearFilters()">
+          Reset All
+        </button>
+      </div>
+    </div>
+
+    <!-- Right Controls -->
+    <div class="control-actions">
+      <!-- Sort Dropdown -->
+      <div class="sort-wrapper">
+        <label class="sort-label">Sort By:</label>
+        <select class="select-input" [value]="sortBy" (change)="onSortChange($any($event.target).value)">
+          <option value="default">Featured / Best Match</option>
+          <option value="newest">Newest Arrivals</option>
+          <option value="rating-desc">Highest Rated</option>
+          <option value="price-asc">Price: Low to High</option>
+          <option value="price-desc">Price: High to Low</option>
+          <option value="name-asc">Name: A to Z</option>
+          <option value="name-desc">Name: Z to A</option>
+        </select>
+      </div>
+
+      <!-- View Mode Buttons -->
+      <div class="view-mode-toggle">
+        <button
+          class="mode-btn"
+          [class.active]="viewMode === 'grid'"
+          (click)="viewMode = 'grid'"
+          title="Grid View"
+        >
+          <span class="material-icons">grid_view</span>
+        </button>
+        <button
+          class="mode-btn"
+          [class.active]="viewMode === 'list'"
+          (click)="viewMode = 'list'"
+          title="List View"
+        >
+          <span class="material-icons">view_list</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Main Layout: Sidebar + Catalog Grid ──────── -->
+  <div class="products-layout">
+
+    <!-- Desktop Sidebar Filter Panel -->
+    <aside class="filters-sidebar">
+      <div class="filters-header">
+        <h3><span class="material-icons">tune</span> Refine Catalog</h3>
+        <button class="btn-clear" (click)="clearFilters()" *ngIf="getActiveFilterCount() > 0">Reset</button>
+      </div>
+
+      <!-- Search Filter -->
+      <div class="filter-group">
+        <label class="filter-label">Search Keywords</label>
+        <div class="search-wrapper">
+          <span class="material-icons search-icon">search</span>
+          <input
+            id="productSearch"
+            type="text"
+            [formControl]="searchControl"
+            placeholder="Search items..."
+            class="filter-input search-input"
+          />
+        </div>
+      </div>
+
+      <!-- Categories Filter -->
+      <div class="filter-group">
+        <label class="filter-label">Categories</label>
+        <div class="category-filters">
+          <button
+            class="category-btn"
+            [class.active]="selectedCategory === ''"
+            (click)="onCategoryChange('')"
+          >
+            <span>All Categories</span>
+            <span class="cat-count">{{ allProducts.length }}</span>
+          </button>
+
+          <button
+            class="category-btn"
+            *ngFor="let cat of categories"
+            [class.active]="selectedCategory === cat._id || selectedCategory === cat.uuid"
+            (click)="onCategoryChange(cat._id)"
+          >
+            <span>{{ cat.name }}</span>
+            <span class="cat-count">{{ getCategoryProductCount(cat._id) }}</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Price Presets & Range -->
+      <div class="filter-group">
+        <label class="filter-label">Price Presets</label>
+        <div class="price-presets">
+          <button
+            class="preset-btn"
+            [class.active]="selectedPricePreset === 'under-50'"
+            (click)="setPricePreset('under-50', 0, 50)"
+          >Under $50</button>
+          <button
+            class="preset-btn"
+            [class.active]="selectedPricePreset === '50-100'"
+            (click)="setPricePreset('50-100', 50, 100)"
+          >$50 - $100</button>
+          <button
+            class="preset-btn"
+            [class.active]="selectedPricePreset === '100-200'"
+            (click)="setPricePreset('100-200', 100, 200)"
+          >$100 - $200</button>
+          <button
+            class="preset-btn"
+            [class.active]="selectedPricePreset === '200-plus'"
+            (click)="setPricePreset('200-plus', 200, null)"
+          >$200+</button>
+        </div>
+
+        <label class="filter-sublabel">Custom Range ($)</label>
+        <div class="price-range">
+          <input
+            type="number"
+            [(ngModel)]="minPrice"
+            placeholder="Min $"
+            class="filter-input price-input"
+            (change)="selectedPricePreset = ''; resetPagination(); applyFilters()"
+          />
+          <span class="price-separator">—</span>
+          <input
+            type="number"
+            [(ngModel)]="maxPrice"
+            placeholder="Max $"
+            class="filter-input price-input"
+            (change)="selectedPricePreset = ''; resetPagination(); applyFilters()"
+          />
+        </div>
+      </div>
+
+      <!-- Customer Ratings Filter -->
+      <div class="filter-group">
+        <label class="filter-label">Minimum Rating</label>
+        <div class="rating-filters">
+          <button
+            class="rating-btn"
+            *ngFor="let r of [4, 3, 2]"
+            [class.active]="selectedRating === r"
+            (click)="setRatingFilter(r)"
+          >
+            <span class="stars">
+              <span class="star-icon" *ngFor="let s of [1,2,3,4,5]" [class.filled]="s <= r">★</span>
+            </span>
+            <span class="rating-text">& Up</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Availability Filter -->
+      <div class="filter-group">
+        <label class="filter-label">Availability</label>
+        <label class="checkbox-label" (click)="toggleInStockOnly()">
+          <input type="checkbox" [checked]="inStockOnly" readonly />
+          <span class="custom-checkbox"></span>
+          <span>In Stock Items Only</span>
+        </label>
+      </div>
+    </aside>
+
+    <!-- Catalog Main Area -->
+    <div class="products-main">
+
+      <!-- Skeleton Loading State -->
+      <div class="products-grid" [class.list-view]="viewMode === 'list'" *ngIf="isLoading">
+        <div class="skeleton-card" *ngFor="let i of [1,2,3,4,5,6,7,8]">
+          <div class="skeleton-image"></div>
+          <div class="skeleton-body">
+            <div class="skeleton-line w-30"></div>
+            <div class="skeleton-line w-80"></div>
+            <div class="skeleton-line w-60"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Products Grid / List -->
+      <div class="products-grid" [class.list-view]="viewMode === 'list'" *ngIf="!isLoading && paginatedProducts.length > 0">
+        <app-product-card
+          *ngFor="let p of paginatedProducts"
+          [product]="p"
+        ></app-product-card>
+      </div>
+
+      <!-- Progressive Pagination / Load More Bar -->
+      <div class="pagination-container" *ngIf="!isLoading && filteredProducts.length > 0">
+        <div class="pagination-progress">
+          <p class="progress-text">
+            Showing <strong>{{ paginatedProducts.length }}</strong> of <strong>{{ filteredProducts.length }}</strong> products
+          </p>
+          <div class="progress-bar-bg">
+            <div
+              class="progress-bar-fill"
+              [style.width.%]="(paginatedProducts.length / filteredProducts.length) * 100"
+            ></div>
+          </div>
+        </div>
+
+        <button
+          class="btn-load-more"
+          *ngIf="paginatedProducts.length < filteredProducts.length"
+          (click)="loadMore()"
+        >
+          <span>Load More Products</span>
+          <span class="material-icons">expand_more</span>
+        </button>
+      </div>
+
+      <!-- Empty State -->
+      <div class="empty-state" *ngIf="!isLoading && filteredProducts.length === 0">
+        <div class="empty-icon-circle">
+          <span class="material-icons empty-icon">search_off</span>
+        </div>
+        <h3>No matching products found</h3>
+        <p>Try adjusting your search criteria, price range, or category selection.</p>
+        <button class="btn btn-primary" style="width:auto;margin-top:1.5rem" (click)="clearFilters()">
+          Clear All Filters
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── Mobile Slide-Over Filter Drawer ───────────── -->
+  <div class="mobile-drawer-overlay" *ngIf="isMobileFilterOpen" (click)="toggleMobileFilter()">
+    <div class="mobile-drawer-content" (click)="$event.stopPropagation()">
+      <div class="drawer-header">
+        <h3>Filter & Refine</h3>
+        <button class="drawer-close" (click)="toggleMobileFilter()">✕</button>
+      </div>
+
+      <div class="drawer-body">
+        <!-- Search Filter -->
+        <div class="filter-group">
+          <label class="filter-label">Search Keywords</label>
+          <input
+            type="text"
+            [formControl]="searchControl"
+            placeholder="Search items..."
+            class="filter-input search-input"
+          />
+        </div>
+
+        <!-- Categories Filter -->
+        <div class="filter-group">
+          <label class="filter-label">Categories</label>
+          <div class="category-filters">
+            <button
+              class="category-btn"
+              [class.active]="selectedCategory === ''"
+              (click)="onCategoryChange('')"
+            >
+              <span>All Categories</span>
+              <span class="cat-count">{{ allProducts.length }}</span>
+            </button>
+
+            <button
+              class="category-btn"
+              *ngFor="let cat of categories"
+              [class.active]="selectedCategory === cat._id || selectedCategory === cat.uuid"
+              (click)="onCategoryChange(cat._id)"
+            >
+              <span>{{ cat.name }}</span>
+              <span class="cat-count">{{ getCategoryProductCount(cat._id) }}</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Price Presets -->
+        <div class="filter-group">
+          <label class="filter-label">Price Presets</label>
+          <div class="price-presets">
+            <button class="preset-btn" [class.active]="selectedPricePreset === 'under-50'" (click)="setPricePreset('under-50', 0, 50)">Under $50</button>
+            <button class="preset-btn" [class.active]="selectedPricePreset === '50-100'" (click)="setPricePreset('50-100', 50, 100)">$50 - $100</button>
+            <button class="preset-btn" [class.active]="selectedPricePreset === '100-200'" (click)="setPricePreset('100-200', 100, 200)">$100 - $200</button>
+            <button class="preset-btn" [class.active]="selectedPricePreset === '200-plus'" (click)="setPricePreset('200-plus', 200, null)">$200+</button>
+          </div>
+        </div>
+
+        <!-- Availability -->
+        <div class="filter-group">
+          <label class="checkbox-label" (click)="toggleInStockOnly()">
+            <input type="checkbox" [checked]="inStockOnly" readonly />
+            <span class="custom-checkbox"></span>
+            <span>In Stock Items Only</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="drawer-footer">
+        <button class="btn btn-secondary" (click)="clearFilters()">Reset All</button>
+        <button class="btn btn-primary" (click)="toggleMobileFilter()">
+          View {{ filteredProducts.length }} Results
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+

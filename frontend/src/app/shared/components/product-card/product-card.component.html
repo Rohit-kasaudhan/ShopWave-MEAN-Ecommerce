@@ -1,0 +1,94 @@
+<div class="product-card" (click)="goToDetail()">
+
+  <!-- Badge -->
+  <div class="card-badge out-of-stock" *ngIf="!isInStock">
+    Out of Stock
+  </div>
+
+  <!-- Image -->
+  <div class="card-image-wrapper">
+    <img
+      [src]="mainImage"
+      (error)="onImageError($event)"
+      [alt]="product.name"
+      class="card-image"
+      loading="lazy"
+    />
+
+    <div class="card-overlay">
+      <button
+        type="button"
+        class="overlay-btn"
+        (click)="$event.stopPropagation(); goToDetail()"
+        title="View product"
+      >
+        <span class="material-icons">visibility</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Body -->
+  <div class="card-body">
+
+    <!-- Category -->
+    <span class="card-category">
+      {{ categoryName }}
+    </span>
+
+    <!-- Product Name -->
+    <h3 class="card-title">
+      {{ product.name }}
+    </h3>
+
+    <!-- Description -->
+    <p class="card-description">
+      {{ product.description }}
+    </p>
+
+    <!-- Colors -->
+    <div
+      class="card-colors"
+      *ngIf="product.colors?.length"
+    >
+      <span
+        class="color-dot"
+        *ngFor="let c of product.colors.slice(0, 4)"
+        [style.background]="c"
+        [title]="c"
+      ></span>
+
+      <span
+        class="color-more"
+        *ngIf="product.colors.length > 4"
+      >
+        +{{ product.colors.length - 4 }}
+      </span>
+    </div>
+
+    <!-- Footer -->
+    <div class="card-footer">
+
+      <!-- Price -->
+      <div class="card-price">
+        <span class="price-currency">$</span>
+        <span class="price-value">
+          {{ product.price | number:'1.2-2' }}
+        </span>
+      </div>
+
+      <!-- Add To Cart -->
+      <button
+        type="button"
+        class="btn-add-cart"
+        [disabled]="!isInStock"
+        (click)="$event.stopPropagation(); addToCart($event)"
+        [title]="isInStock ? 'Add to cart' : 'Out of stock'"
+      >
+        <span class="material-icons">
+          add_shopping_cart
+        </span>
+      </button>
+
+    </div>
+  </div>
+</div>

@@ -1,0 +1,476 @@
+<!--
+  register.component.html — Registration Page Template
+  
+  Layout: Two-column on desktop (brand panel left, form right).
+  Single column on mobile.
+  
+  Features:
+  - Reactive form bound to registerForm (FormGroup)
+  - Inline validation error messages per field
+  - Password strength indicator bars
+  - Password visibility toggles
+  - Loading spinner on submit button
+  - API error / success alert banners
+  - Semantic HTML5 with ARIA labels for accessibility
+-->
+
+<!-- Main auth page layout (defined in global styles.css) -->
+<main class="auth-page" id="register-page">
+
+  <!-- ============================================================
+       LEFT PANEL — Branding (only visible ≥768px via CSS)
+       ============================================================ -->
+  <section class="auth-brand" aria-hidden="true">
+    <!-- App logo image -->
+    <div class="brand-logo">
+      <img
+        src="assets/images/logo.png"
+        alt="ShopWave Logo"
+        class="logo-img"
+        loading="eager"
+      />
+    </div>
+
+    <!-- Brand headline -->
+    <div class="brand-copy">
+      <h1 class="brand-title">
+        Welcome to<br>
+        <span class="brand-accent">ShopWave</span>
+      </h1>
+      <p class="brand-subtitle">
+        Your premium destination for curated shopping experiences.
+        Join thousands of happy customers today.
+      </p>
+    </div>
+
+    <!-- Feature bullet points -->
+    <ul class="brand-features" role="list">
+      <li class="feature-item">
+        <span class="feature-icon material-icons" aria-hidden="true">shield</span>
+        <span>Secure &amp; encrypted transactions</span>
+      </li>
+      <li class="feature-item">
+        <span class="feature-icon material-icons" aria-hidden="true">local_shipping</span>
+        <span>Fast delivery to your doorstep</span>
+      </li>
+      <li class="feature-item">
+        <span class="feature-icon material-icons" aria-hidden="true">star</span>
+        <span>Exclusive member-only deals</span>
+      </li>
+    </ul>
+
+    <!-- Decorative floating orbs -->
+    <div class="orb orb-1" aria-hidden="true"></div>
+    <div class="orb orb-2" aria-hidden="true"></div>
+  </section>
+
+  <!-- ============================================================
+       RIGHT PANEL — Registration Form Card
+       ============================================================ -->
+  <section class="form-section">
+    <div class="auth-card register-card">
+
+      <!-- Card header -->
+      <header class="card-header">
+        <!-- Mobile-only logo (hidden on desktop) -->
+        <div class="mobile-logo" aria-hidden="true">
+          <img src="assets/images/logo.png" alt="ShopWave" class="mobile-logo-img" />
+        </div>
+        <h2 class="card-title">Create Account</h2>
+        <p class="card-subtitle text-muted">
+          Fill in your details to get started
+        </p>
+      </header>
+
+      <!-- ── API Error Alert ── -->
+      <div
+        *ngIf="apiError"
+        class="alert alert-error"
+        role="alert"
+        aria-live="polite"
+        id="register-error-banner"
+      >
+        <span class="material-icons" aria-hidden="true">error_outline</span>
+        <span>{{ apiError }}</span>
+      </div>
+
+      <!-- ── API Success Alert ── -->
+      <div
+        *ngIf="apiSuccess"
+        class="alert alert-success"
+        role="status"
+        aria-live="polite"
+        id="register-success-banner"
+      >
+        <span class="material-icons" aria-hidden="true">check_circle</span>
+        <span>{{ apiSuccess }}</span>
+      </div>
+
+      <!-- ── Registration Form ── -->
+      <form
+        [formGroup]="registerForm"
+        (ngSubmit)="onSubmit()"
+        novalidate
+        id="register-form"
+        autocomplete="on"
+      >
+
+        <!-- Row 1: First Name + Last Name -->
+        <div class="form-row">
+
+          <!-- First Name -->
+          <div class="form-group">
+            <label class="form-label" for="reg-firstName">First Name</label>
+            <div class="input-wrapper">
+              <span class="input-icon material-icons" aria-hidden="true">person</span>
+              <input
+                id="reg-firstName"
+                type="text"
+                class="form-control"
+                [class.is-invalid]="isFieldInvalid('FirstName')"
+                [class.is-valid]="isFieldValid('FirstName')"
+                formControlName="FirstName"
+                placeholder="Rohit"
+                autocomplete="given-name"
+                aria-required="true"
+                [attr.aria-invalid]="isFieldInvalid('FirstName')"
+                aria-describedby="firstName-error"
+              />
+            </div>
+            <span
+              *ngIf="isFieldInvalid('FirstName')"
+              class="field-error"
+              id="firstName-error"
+              role="alert"
+            >
+              <span class="material-icons" aria-hidden="true">info</span>
+              {{ getFieldError('FirstName') }}
+            </span>
+          </div>
+
+          <!-- Last Name -->
+          <div class="form-group">
+            <label class="form-label" for="reg-lastName">Last Name</label>
+            <div class="input-wrapper">
+              <span class="input-icon material-icons" aria-hidden="true">person</span>
+              <input
+                id="reg-lastName"
+                type="text"
+                class="form-control"
+                [class.is-invalid]="isFieldInvalid('LastName')"
+                [class.is-valid]="isFieldValid('LastName')"
+                formControlName="LastName"
+                placeholder="Kasaudhan"
+                autocomplete="family-name"
+                aria-required="true"
+                [attr.aria-invalid]="isFieldInvalid('LastName')"
+                aria-describedby="lastName-error"
+              />
+            </div>
+            <span
+              *ngIf="isFieldInvalid('LastName')"
+              class="field-error"
+              id="lastName-error"
+              role="alert"
+            >
+              <span class="material-icons" aria-hidden="true">info</span>
+              {{ getFieldError('LastName') }}
+            </span>
+          </div>
+
+        </div><!-- /form-row -->
+
+        <!-- Row 2: Email -->
+        <div class="form-group">
+          <label class="form-label" for="reg-email">Email Address</label>
+          <div class="input-wrapper">
+            <span class="input-icon material-icons" aria-hidden="true">email</span>
+            <input
+              id="reg-email"
+              type="email"
+              class="form-control"
+              [class.is-invalid]="isFieldInvalid('email')"
+              [class.is-valid]="isFieldValid('email')"
+              formControlName="email"
+              placeholder="rohit@example.com"
+              autocomplete="email"
+              aria-required="true"
+              [attr.aria-invalid]="isFieldInvalid('email')"
+              aria-describedby="email-error"
+            />
+          </div>
+          <span
+            *ngIf="isFieldInvalid('email')"
+            class="field-error"
+            id="email-error"
+            role="alert"
+          >
+            <span class="material-icons" aria-hidden="true">info</span>
+            {{ getFieldError('email') }}
+          </span>
+        </div>
+
+        <!-- Row 3: Phone -->
+        <div class="form-group">
+          <label class="form-label" for="reg-phone">
+            Phone Number
+            <span class="label-hint">(Indian number)</span>
+          </label>
+          <div class="input-wrapper">
+            <span class="input-icon material-icons" aria-hidden="true">phone</span>
+            <input
+              id="reg-phone"
+              type="tel"
+              class="form-control"
+              [class.is-invalid]="isFieldInvalid('phone')"
+              [class.is-valid]="isFieldValid('phone')"
+              formControlName="phone"
+              placeholder="9800000000"
+              autocomplete="tel"
+              maxlength="10"
+              aria-required="true"
+              [attr.aria-invalid]="isFieldInvalid('phone')"
+              aria-describedby="phone-error"
+            />
+          </div>
+          <span
+            *ngIf="isFieldInvalid('phone')"
+            class="field-error"
+            id="phone-error"
+            role="alert"
+          >
+            <span class="material-icons" aria-hidden="true">info</span>
+            {{ getFieldError('phone') }}
+          </span>
+        </div>
+
+        <!-- Row 4: Password -->
+        <div class="form-group">
+          <label class="form-label" for="reg-password">Password</label>
+          <div class="input-wrapper has-right-icon">
+            <span class="input-icon material-icons" aria-hidden="true">lock</span>
+            <input
+              id="reg-password"
+              [type]="showPassword ? 'text' : 'password'"
+              class="form-control"
+              [class.is-invalid]="isFieldInvalid('password')"
+              [class.is-valid]="isFieldValid('password')"
+              formControlName="password"
+              placeholder="Min. 6 chars, upper &amp; lower case"
+              autocomplete="new-password"
+              aria-required="true"
+              [attr.aria-invalid]="isFieldInvalid('password')"
+              aria-describedby="password-error password-strength-hint"
+            />
+            <!-- Toggle password visibility -->
+            <button
+              type="button"
+              class="input-icon-right"
+              (click)="showPassword = !showPassword"
+              [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'"
+              id="toggle-password"
+            >
+              <span class="material-icons">{{ showPassword ? 'visibility_off' : 'visibility' }}</span>
+            </button>
+          </div>
+
+          <!-- Password strength meter -->
+          <div
+            *ngIf="registerForm.get('password')?.value"
+            class="password-strength"
+            id="password-strength-hint"
+            aria-live="polite"
+            [attr.aria-label]="'Password strength: ' + strengthLabel"
+          >
+            <div class="strength-bar" [class]="getStrengthClass(0)"></div>
+            <div class="strength-bar" [class]="getStrengthClass(1)"></div>
+            <div class="strength-bar" [class]="getStrengthClass(2)"></div>
+          </div>
+          <span
+            *ngIf="registerForm.get('password')?.value"
+            class="strength-label-text"
+            [attr.data-strength]="passwordStrength"
+          >
+            {{ strengthLabel }}
+          </span>
+
+          <span
+            *ngIf="isFieldInvalid('password')"
+            class="field-error"
+            id="password-error"
+            role="alert"
+          >
+            <span class="material-icons" aria-hidden="true">info</span>
+            {{ getFieldError('password') }}
+          </span>
+        </div>
+
+        <!-- Row 5: Confirm Password -->
+        <div class="form-group">
+          <label class="form-label" for="reg-confirm-password">Confirm Password</label>
+          <div class="input-wrapper has-right-icon">
+            <span class="input-icon material-icons" aria-hidden="true">lock</span>
+            <input
+              id="reg-confirm-password"
+              [type]="showConfirmPassword ? 'text' : 'password'"
+              class="form-control"
+              [class.is-invalid]="isFieldInvalid('confirmPassword') || passwordsMismatch"
+              [class.is-valid]="isFieldValid('confirmPassword') && !passwordsMismatch"
+              formControlName="confirmPassword"
+              placeholder="Re-enter your password"
+              autocomplete="new-password"
+              aria-required="true"
+              [attr.aria-invalid]="isFieldInvalid('confirmPassword') || passwordsMismatch"
+              aria-describedby="confirm-password-error"
+            />
+            <button
+              type="button"
+              class="input-icon-right"
+              (click)="showConfirmPassword = !showConfirmPassword"
+              [attr.aria-label]="showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'"
+              id="toggle-confirm-password"
+            >
+              <span class="material-icons">{{ showConfirmPassword ? 'visibility_off' : 'visibility' }}</span>
+            </button>
+          </div>
+          <span
+            *ngIf="isFieldInvalid('confirmPassword')"
+            class="field-error"
+            id="confirm-password-error"
+            role="alert"
+          >
+            <span class="material-icons" aria-hidden="true">info</span>
+            {{ getFieldError('confirmPassword') }}
+          </span>
+          <span
+            *ngIf="passwordsMismatch && !isFieldInvalid('confirmPassword')"
+            class="field-error"
+            role="alert"
+          >
+            <span class="material-icons" aria-hidden="true">info</span>
+            Passwords do not match.
+          </span>
+        </div>
+
+        <!-- Row 6: Birth Date + Gender -->
+        <div class="form-row">
+
+          <!-- Birth Date -->
+          <div class="form-group">
+            <label class="form-label" for="reg-birth-date">Date of Birth</label>
+            <div class="input-wrapper">
+              <span class="input-icon material-icons" aria-hidden="true">cake</span>
+              <input
+                id="reg-birth-date"
+                type="date"
+                class="form-control"
+                [class.is-invalid]="isFieldInvalid('birthDate')"
+                [class.is-valid]="isFieldValid('birthDate')"
+                formControlName="birthDate"
+                [max]="maxBirthDate"
+                aria-required="true"
+                [attr.aria-invalid]="isFieldInvalid('birthDate')"
+                aria-describedby="birthdate-error"
+              />
+            </div>
+            <span
+              *ngIf="isFieldInvalid('birthDate')"
+              class="field-error"
+              id="birthdate-error"
+              role="alert"
+            >
+              <span class="material-icons" aria-hidden="true">info</span>
+              {{ getFieldError('birthDate') }}
+            </span>
+          </div>
+
+          <!-- Gender -->
+          <div class="form-group">
+            <label class="form-label" for="reg-gender">Gender</label>
+            <div class="input-wrapper">
+              <span class="input-icon material-icons" aria-hidden="true">wc</span>
+              <select
+                id="reg-gender"
+                class="form-control"
+                [class.is-invalid]="isFieldInvalid('gender')"
+                [class.is-valid]="isFieldValid('gender')"
+                formControlName="gender"
+                aria-required="true"
+                [attr.aria-invalid]="isFieldInvalid('gender')"
+                aria-describedby="gender-error"
+              >
+                <option value="" disabled>Select gender</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+              </select>
+            </div>
+            <span
+              *ngIf="isFieldInvalid('gender')"
+              class="field-error"
+              id="gender-error"
+              role="alert"
+            >
+              <span class="material-icons" aria-hidden="true">info</span>
+              {{ getFieldError('gender') }}
+            </span>
+          </div>
+
+        </div><!-- /form-row -->
+
+        <!-- ── Submit Button ── -->
+        <button
+          type="submit"
+          class="btn btn-primary"
+          id="register-submit-btn"
+          [disabled]="isLoading"
+          aria-busy="{{ isLoading }}"
+        >
+          <span *ngIf="!isLoading">
+            Create Account
+            <span class="material-icons btn-icon" aria-hidden="true">arrow_forward</span>
+          </span>
+          <span *ngIf="isLoading" class="loading-state" aria-label="Processing...">
+            <span class="spinner" aria-hidden="true"></span>
+            Creating your account...
+          </span>
+        </button>
+
+      </form><!-- /form -->
+
+      <!-- Footer link to login -->
+      <footer class="card-footer text-center">
+        <p class="text-sm text-muted">
+          Already have an account?
+          <a routerLink="/login" id="go-to-login" class="link-accent">Sign In</a>
+        </p>
+
+        <!-- Admin Access Note Callout -->
+        <div class="admin-hint-card" id="admin-register-hint" style="margin-top: var(--space-4);">
+          <div class="admin-hint-header">
+            <span class="material-icons admin-hint-icon" aria-hidden="true">admin_panel_settings</span>
+            <span class="admin-hint-title">Admin Access Credentials</span>
+          </div>
+          <p class="text-xs text-muted" style="margin: 0; text-align: left;">
+            Admin accounts cannot be created via registration. Use fixed credentials to sign in:
+          </p>
+          <div class="admin-hint-credentials">
+            <div class="credential-item">
+              <span class="credential-label">ID / Email:</span>
+              <code class="credential-value">admin@shopwave.com</code>
+            </div>
+            <div class="credential-item">
+              <span class="credential-label">Password:</span>
+              <code class="credential-value">admin123456</code>
+            </div>
+          </div>
+          <a routerLink="/login" class="btn-fill-admin" id="go-to-admin-login" style="text-decoration: none;">
+            <span class="material-icons" aria-hidden="true">login</span>
+            Go to Admin Sign In
+          </a>
+        </div>
+      </footer>
+
+    </div><!-- /auth-card -->
+  </section><!-- /form-section -->
+
+</main><!-- /auth-page -->

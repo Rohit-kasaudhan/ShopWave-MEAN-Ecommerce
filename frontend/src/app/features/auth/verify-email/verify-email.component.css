@@ -1,0 +1,195 @@
+/*
+ * verify-email.component.css — Email Verification Page Styles
+ *
+ * Centered single-column layout with large OTP input boxes.
+ * Inherits global tokens from styles.css.
+ */
+
+/* Page layout — centered column (no two-column needed here) */
+.verify-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  grid-template-columns: 1fr !important; /* Override the two-col grid */
+}
+
+.verify-container {
+  width: 100%;
+  max-width: 480px;
+  padding: var(--space-4);
+}
+
+/* Card with top accent */
+.verify-card {
+  text-align: center;
+  border-top: 2px solid var(--color-accent);
+}
+
+/* ============================================================
+   Email Icon Illustration
+   ============================================================ */
+.verify-icon {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: var(--space-6);
+  margin-top: var(--space-2);
+}
+
+.verify-icon-main {
+  font-size: 3.5rem;
+  color: var(--color-accent-light);
+  position: relative;
+  z-index: 1;
+  /* Gentle bounce animation */
+  animation: bounce 2s ease-in-out infinite;
+}
+
+/* Pulsing ring around the icon */
+.verify-icon-ring {
+  position: absolute;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 2px solid rgba(233, 69, 96, 0.3);
+  animation: ring-pulse 2s ease-in-out infinite;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-6px); }
+}
+
+@keyframes ring-pulse {
+  0%       { transform: scale(0.9); opacity: 0.8; }
+  50%      { transform: scale(1.1); opacity: 0.4; }
+  100%     { transform: scale(0.9); opacity: 0.8; }
+}
+
+/* ============================================================
+   Card Header
+   ============================================================ */
+.card-header {
+  margin-bottom: var(--space-6);
+}
+
+.card-title {
+  font-family: var(--font-heading);
+  font-size: var(--text-3xl);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin-bottom: var(--space-2);
+}
+
+.card-subtitle {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+}
+
+/* Email address shown below subtitle */
+.email-display {
+  margin-top: var(--space-2);
+  font-size: var(--text-base);
+  font-weight: 600;
+  color: var(--color-accent-light);
+  word-break: break-all;
+}
+
+/* ============================================================
+   OTP Input Boxes — (global .otp-input styles in styles.css)
+   Extra verify-specific layout:
+   ============================================================ */
+.otp-group {
+  /* Ensure inputs are large enough to tap on mobile */
+  gap: var(--space-2);
+}
+
+@media (max-width: 400px) {
+  .otp-input {
+    width: 42px;
+    height: 52px;
+    font-size: var(--text-xl);
+  }
+}
+
+/* ============================================================
+   Submit Button
+   ============================================================ */
+.btn-icon {
+  font-size: 1.1rem;
+  vertical-align: middle;
+  transition: transform var(--transition-base);
+}
+
+.btn-primary:hover .btn-icon {
+  transform: scale(1.2);
+}
+
+.loading-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+}
+
+/* ============================================================
+   Resend Section
+   ============================================================ */
+.resend-section {
+  margin-top: var(--space-6);
+}
+
+.countdown-text {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  margin-top: var(--space-2);
+}
+
+.countdown-number {
+  color: var(--color-accent-light);
+  font-weight: 700;
+  font-family: var(--font-heading);
+  font-variant-numeric: tabular-nums;
+  display: inline-block;
+  min-width: 2.5ch;
+}
+
+/* Inline text button for resend */
+.btn-link {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: var(--color-accent-light);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  font-family: var(--font-body);
+  margin-top: var(--space-2);
+  display: inline-block;
+  transition: color var(--transition-fast);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.btn-link:hover {
+  color: var(--color-accent);
+}
+
+/* ============================================================
+   Footer
+   ============================================================ */
+.card-footer {
+  margin-top: var(--space-6);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--color-border);
+}
+
+.link-accent {
+  color: var(--color-accent-light);
+  font-weight: 600;
+  margin-left: var(--space-1);
+  transition: color var(--transition-fast);
+}
+
+.link-accent:hover { color: var(--color-accent); }

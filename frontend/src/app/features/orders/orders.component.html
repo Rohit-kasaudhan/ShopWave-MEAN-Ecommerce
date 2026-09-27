@@ -1,0 +1,98 @@
+<div class="orders-page">
+  <h1 class="page-title">My <span class="gradient-text">Purchases</span></h1>
+
+  <!-- Loading -->
+  <div class="loading-state" *ngIf="isLoading">
+    <div class="spinner" style="width:40px;height:40px;border-width:3px"></div>
+    <p>Loading your orders...</p>
+  </div>
+
+  <!-- Empty -->
+  <div class="empty-state" *ngIf="!isLoading && orders.length === 0">
+    <span class="material-icons empty-icon">receipt_long</span>
+    <h3>No orders yet</h3>
+    <p>Your purchase history will appear here</p>
+    <a routerLink="/products" class="btn btn-primary" style="width:auto;display:inline-flex;margin-top:1rem">
+      Start Shopping
+    </a>
+  </div>
+
+  <!-- Orders List -->
+  <div class="orders-list" *ngIf="!isLoading && orders.length > 0">
+    <div class="order-card" *ngFor="let order of orders">
+      <!-- Order Header -->
+      <div class="order-header" (click)="toggleExpand(getOrderIdentifier(order))">
+        <div class="order-meta">
+          <div class="order-id">
+            <span class="material-icons">receipt</span>
+            #{{ getOrderIdentifier(order) }}
+          </div>
+          <div class="order-date">{{ order.createdAt | date:'MMM d, y' }}</div>
+        </div>
+
+        <div class="order-summary">
+          <div class="order-items-count">{{ order.items?.length || 0 }} item(s)</div>
+          <div class="order-total">${{ order.totalPrice | number:'1.2-2' }}</div>
+          <div class="order-status" [ngClass]="getStatusClass(order.status)">
+            <span class="material-icons">{{ getStatusIcon(order.status) }}</span>
+            {{ order.status | titlecase }}
+          </div>
+          <span class="material-icons expand-icon" [class.rotated]="expandedOrder === getOrderIdentifier(order)">
+            expand_more
+          </span>
+        </div>
+      </div>
+
+      <!-- Expanded Details -->
+      <div class="order-details" *ngIf="expandedOrder === getOrderIdentifier(order)">
+        <div class="detail-divider"></div>
+
+        <!-- Items -->
+        <div class="order-items">
+          <div class="order-item" *ngFor="let item of order.items">
+            <img [src]="getItemImage(item)" [alt]="getItemName(item)" (error)="onImageError($event)" class="item-img" />
+            <div class="item-info">
+              <div class="item-name">{{ getItemName(item) }}</div>
+              <div class="item-meta">
+                <span *ngIf="item.color">Color: {{ item.color }}</span>
+                <span *ngIf="item.size">Size: {{ item.size }}</span>
+              </div>
+            </div>
+            <div class="item-qty-price">
+              <span>x{{ item.quantity }}</span>
+              <span class="item-total">${{ (item.price * item.quantity) | number:'1.2-2' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Shipping & Payment -->
+        <div class="order-footer-info">
+          <div class="info-block" *ngIf="order.shippingAddress?.city">
+            <span class="material-icons">place</span>
+            <div>
+              <div class="info-label">Shipping Address</div>
+              <div class="info-value">
+                {{ order.shippingAddress?.street }}, {{ order.shippingAddress?.city }},
+                {{ order.shippingAddress?.country }}
+              </div>
+            </div>
+          </div>
+          <div class="info-block">
+            <span class="material-icons">payments</span>
+            <div>
+              <div class="info-label">Payment Method</div>
+              <div class="info-value">{{ order.paymentMethod | titlecase }}</div>
+            </div>
+          </div>
+          <div class="info-block" *ngIf="order.deliveredAt">
+            <span class="material-icons">check_circle</span>
+            <div>
+              <div class="info-label">Delivered On</div>
+              <div class="info-value">{{ order.deliveredAt | date:'MMM d, y' }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

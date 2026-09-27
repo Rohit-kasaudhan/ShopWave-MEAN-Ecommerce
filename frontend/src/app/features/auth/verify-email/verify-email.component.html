@@ -1,0 +1,135 @@
+<!--
+  verify-email.component.html — Email Verification Page Template
+
+  Displays:
+  - The masked email address being verified
+  - 6 individual OTP input boxes
+  - Auto-advance and paste support
+  - Resend code button with countdown
+  - Submit button and API error/success banners
+-->
+
+<main class="auth-page verify-page" id="verify-email-page">
+
+  <section class="verify-container">
+    <div class="auth-card verify-card">
+
+      <!-- Email icon illustration -->
+      <div class="verify-icon" aria-hidden="true">
+        <span class="material-icons verify-icon-main">mark_email_unread</span>
+        <div class="verify-icon-ring"></div>
+      </div>
+
+      <!-- Header -->
+      <header class="card-header">
+        <h2 class="card-title">Check Your Email</h2>
+        <p class="card-subtitle text-muted">
+          We sent a 6-digit verification code to
+        </p>
+        <p class="email-display" aria-label="Email address: {{ pendingEmail }}">
+          {{ pendingEmail }}
+        </p>
+      </header>
+
+      <!-- API Error Alert -->
+      <div
+        *ngIf="apiError"
+        class="alert alert-error"
+        role="alert"
+        aria-live="polite"
+        id="verify-error-banner"
+      >
+        <span class="material-icons" aria-hidden="true">error_outline</span>
+        <span>{{ apiError }}</span>
+      </div>
+
+      <!-- API Success Alert -->
+      <div
+        *ngIf="apiSuccess"
+        class="alert alert-success"
+        role="status"
+        aria-live="polite"
+        id="verify-success-banner"
+      >
+        <span class="material-icons" aria-hidden="true">check_circle</span>
+        <span>{{ apiSuccess }}</span>
+      </div>
+
+      <!-- OTP Code Input Group -->
+      <div
+        class="otp-group"
+        role="group"
+        aria-label="Enter the 6-digit verification code"
+        (paste)="onOtpPaste($event)"
+      >
+        <input
+          *ngFor="let digit of otpDigits; let i = index"
+          #otpInput
+          type="text"
+          inputmode="numeric"
+          maxlength="1"
+          pattern="[0-9]"
+          class="otp-input"
+          [class.filled]="otpDigits[i] !== ''"
+          [value]="otpDigits[i]"
+          [attr.id]="'otp-' + i"
+          [attr.aria-label]="'Digit ' + (i + 1) + ' of 6'"
+          autocomplete="off"
+          (keydown)="onOtpKeyDown($event, i)"
+          (input)="onOtpInput($event, i)"
+        />
+      </div>
+
+      <!-- Submit Button -->
+      <button
+        type="button"
+        class="btn btn-primary"
+        id="verify-submit-btn"
+        (click)="onSubmit()"
+        [disabled]="!isOtpComplete || isLoading"
+        [attr.aria-busy]="isLoading"
+      >
+        <span *ngIf="!isLoading">
+          Verify Email
+          <span class="material-icons btn-icon" aria-hidden="true">verified</span>
+        </span>
+        <span *ngIf="isLoading" class="loading-state" aria-label="Verifying...">
+          <span class="spinner" aria-hidden="true"></span>
+          Verifying...
+        </span>
+      </button>
+
+      <!-- Resend Code -->
+      <div class="resend-section text-center">
+        <p class="text-sm text-muted">Didn't receive the code?</p>
+
+        <!-- Countdown timer shown while waiting -->
+        <p *ngIf="!canResend" class="countdown-text" aria-live="polite">
+          Resend available in
+          <span class="countdown-number">{{ resendCountdown }}s</span>
+        </p>
+
+        <!-- Resend button shown when countdown expires -->
+        <button
+          *ngIf="canResend"
+          type="button"
+          class="btn-link"
+          (click)="resendCode()"
+          id="resend-code-btn"
+        >
+          Resend Code
+        </button>
+      </div>
+
+      <!-- Footer -->
+      <footer class="card-footer text-center">
+        <p class="text-sm text-muted">
+          Wrong email?
+          <a routerLink="/register" id="back-to-register" class="link-accent">Go back</a>
+        </p>
+      </footer>
+
+    </div>
+  </section>
+
+</main>

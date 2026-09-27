@@ -1,0 +1,251 @@
+<div class="cart-page">
+  <h1 class="page-title">My <span class="gradient-text">Cart</span></h1>
+
+  <!-- Loading -->
+  <div class="loading-state" *ngIf="isLoading">
+    <div class="spinner" style="width:40px;height:40px;border-width:3px"></div>
+    <p>Loading your cart...</p>
+  </div>
+
+  <!-- Empty Cart -->
+  <div class="empty-state" *ngIf="!isLoading && (!cart || cart.items.length === 0) && !showOrderSuccessModal">
+    <span class="material-icons empty-icon">shopping_cart</span>
+    <h3>Your cart is empty</h3>
+    <p>Add some products to get started!</p>
+    <a routerLink="/products" class="btn btn-primary" style="width:auto;display:inline-flex">
+      <span class="material-icons">storefront</span> Browse Products
+    </a>
+  </div>
+
+  <!-- Cart Content -->
+  <div class="cart-layout" *ngIf="!isLoading && cart && cart.items.length > 0">
+
+    <!-- Items -->
+    <div class="cart-items">
+      <div class="cart-item" *ngFor="let item of cart.items">
+        <img [src]="getItemImage(item)" (error)="onImageError($event)" [alt]="getItemName(item)" class="item-img" />
+        <div class="item-info">
+          <h3 class="item-name">{{ getItemName(item) }}</h3>
+          <div class="item-meta">
+            <span *ngIf="item.color">Color: <strong>{{ item.color }}</strong></span>
+            <span *ngIf="item.size">Size: <strong>{{ item.size }}</strong></span>
+          </div>
+          <div class="item-price">${{ item.price | number:'1.2-2' }}</div>
+        </div>
+        <div class="item-qty">
+          <button class="qty-btn" (click)="updateQuantity(item._id, item.quantity - 1)" [disabled]="item.quantity <= 1">
+            <span class="material-icons">remove</span>
+          </button>
+          <span class="qty-val">{{ item.quantity }}</span>
+          <button class="qty-btn" (click)="updateQuantity(item._id, item.quantity + 1)">
+            <span class="material-icons">add</span>
+          </button>
+        </div>
+        <div class="item-total">${{ (item.price * item.quantity) | number:'1.2-2' }}</div>
+        <button class="btn-remove" (click)="removeItem(item._id)" title="Remove">
+          <span class="material-icons">delete_outline</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Summary Sidebar -->
+    <div class="cart-summary">
+      <h3 class="summary-title">Order Summary</h3>
+      <div class="summary-row">
+        <span>Items ({{ totalItems }})</span>
+        <span>${{ cart.totalPrice | number:'1.2-2' }}</span>
+      </div>
+      <div class="summary-row">
+        <span>Shipping</span>
+        <span class="free-shipping">Free</span>
+      </div>
+      <div class="summary-divider"></div>
+      <div class="summary-total">
+        <span>Total</span>
+        <span>${{ cart.totalPrice | number:'1.2-2' }}</span>
+      </div>
+
+      <button
+        class="btn-checkout"
+        *ngIf="!showCheckoutForm"
+        (click)="showCheckoutForm = true"
+      >
+        <span class="material-icons">payments</span>
+        Proceed to Checkout
+      </button>
+
+      <!-- Checkout Form -->
+      <div class="checkout-form" *ngIf="showCheckoutForm">
+        <h4 class="form-section-title">Shipping Address</h4>
+        <input class="checkout-input" placeholder="Street address" [(ngModel)]="shippingAddress.street" />
+        <div class="checkout-row">
+          <input class="checkout-input" placeholder="City" [(ngModel)]="shippingAddress.city" />
+          <input class="checkout-input" placeholder="Postal Code" [(ngModel)]="shippingAddress.postalCode" />
+        </div>
+        <input class="checkout-input" placeholder="Country" [(ngModel)]="shippingAddress.country" />
+
+        <h4 class="form-section-title" style="margin-top:1rem">Payment Method</h4>
+        <div class="payment-options">
+          <label class="payment-opt" [class.selected]="paymentMethod === 'cash'">
+            <input type="radio" name="payment" value="cash" [(ngModel)]="paymentMethod" />
+            <span class="material-icons">payments</span>
+            Cash on Delivery
+          </label>
+          <label class="payment-opt" [class.selected]="paymentMethod === 'card'">
+            <input type="radio" name="payment" value="card" [(ngModel)]="paymentMethod" />
+            <span class="material-icons">credit_card</span>
+            Card
+          </label>
+        </div>
+
+        <div class="checkout-actions">
+          <button class="btn-cancel" (click)="showCheckoutForm = false">Cancel</button>
+          <button class="btn-place-order" [disabled]="isCheckingOut" (click)="checkout()">
+            <span class="spinner" *ngIf="isCheckingOut"></span>
+            {{ isCheckingOut ? 'Placing...' : 'Place Order' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       ORDER PLACED CONFIRMATION MODAL WITH FULL PRODUCT DETAILS
+       ============================================================ -->
+  <div
+    class="order-modal-backdrop"
+    *ngIf="showOrderSuccessModal && placedOrder"
+    (click)="closeOrderSuccessModal()"
+    id="order-placed-modal-backdrop"
+  >
+    <div class="order-modal-card" (click)="$event.stopPropagation()" id="order-placed-modal">
+
+      <!-- Close Button -->
+      <button class="modal-close-btn" (click)="closeOrderSuccessModal()" aria-label="Close modal">
+        <span class="material-icons">close</span>
+      </button>
+
+      <!-- Modal Header -->
+      <div class="modal-header">
+        <div class="success-icon-wrap">
+          <span class="material-icons success-icon">check_circle</span>
+        </div>
+        <h2 class="modal-title">Order Placed Successfully! 🎉</h2>
+        <p class="modal-subtitle">
+          Thank you for your purchase! Here are the full details of the products ordered:
+        </p>
+        <div class="order-reference-badge">
+          <span class="ref-label">Order ID:</span>
+          <span class="ref-id">#{{ getOrderIdentifier(placedOrder) }}</span>
+        </div>
+      </div>
+
+      <!-- Modal Body (Scrollable) -->
+      <div class="modal-body">
+
+        <!-- Products Section -->
+        <div class="modal-section">
+          <h3 class="section-title">
+            <span class="material-icons">inventory_2</span>
+            Ordered Products ({{ placedOrder.items?.length || 0 }})
+          </h3>
+
+          <div class="modal-products-list">
+            <div class="modal-product-item" *ngFor="let item of placedOrder.items">
+              <img
+                [src]="getOrderItemImage(item)"
+                [alt]="getOrderItemName(item)"
+                (error)="onImageError($event)"
+                class="modal-item-img"
+              />
+              <div class="modal-item-info">
+                <h4 class="modal-item-name">{{ getOrderItemName(item) }}</h4>
+                <div class="modal-item-badges">
+                  <span class="badge-variant" *ngIf="item.color">Color: <strong>{{ item.color }}</strong></span>
+                  <span class="badge-variant" *ngIf="item.size">Size: <strong>{{ item.size }}</strong></span>
+                </div>
+                <div class="modal-item-calc">
+                  <span class="modal-item-qty">Qty: {{ item.quantity }}</span>
+                  <span class="modal-item-unit-price">${{ item.price | number:'1.2-2' }} each</span>
+                </div>
+              </div>
+              <div class="modal-item-subtotal">
+                <span class="subtotal-label">Subtotal</span>
+                <span class="subtotal-amount">${{ (item.price * item.quantity) | number:'1.2-2' }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Order Meta Details: Address & Payment -->
+        <div class="modal-meta-grid">
+
+          <!-- Shipping Address -->
+          <div class="meta-box" *ngIf="placedOrder.shippingAddress?.street || placedOrder.shippingAddress?.city">
+            <div class="meta-box-header">
+              <span class="material-icons">local_shipping</span>
+              <span>Delivery Address</span>
+            </div>
+            <div class="meta-box-body">
+              <p class="meta-line">{{ placedOrder.shippingAddress?.street }}</p>
+              <p class="meta-line">
+                {{ placedOrder.shippingAddress?.city }}
+                <span *ngIf="placedOrder.shippingAddress?.postalCode">, {{ placedOrder.shippingAddress?.postalCode }}</span>
+              </p>
+              <p class="meta-line" *ngIf="placedOrder.shippingAddress?.country">{{ placedOrder.shippingAddress?.country }}</p>
+            </div>
+          </div>
+
+          <!-- Payment & Status -->
+          <div class="meta-box">
+            <div class="meta-box-header">
+              <span class="material-icons">credit_card</span>
+              <span>Payment &amp; Status</span>
+            </div>
+            <div class="meta-box-body">
+              <p class="meta-line payment-badge">
+                <span class="material-icons">{{ placedOrder.paymentMethod === 'card' ? 'credit_card' : 'payments' }}</span>
+                {{ placedOrder.paymentMethod === 'card' ? 'Card Payment' : 'Cash on Delivery' }}
+              </p>
+              <p class="meta-line status-badge">
+                Status: <span class="status-tag">{{ (placedOrder.status || 'pending') | titlecase }}</span>
+              </p>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Total Cost Breakdown -->
+        <div class="modal-cost-breakdown">
+          <div class="cost-line">
+            <span>Items Subtotal</span>
+            <span>${{ placedOrder.totalPrice | number:'1.2-2' }}</span>
+          </div>
+          <div class="cost-line">
+            <span>Shipping</span>
+            <span class="free-badge">FREE</span>
+          </div>
+          <div class="cost-divider"></div>
+          <div class="cost-line total-line">
+            <span>Total Amount Paid</span>
+            <span class="total-price">${{ placedOrder.totalPrice | number:'1.2-2' }}</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Modal Footer Action Buttons -->
+      <div class="modal-footer-actions">
+        <button class="btn-modal btn-continue" (click)="continueShopping()">
+          <span class="material-icons">storefront</span>
+          Continue Shopping
+        </button>
+        <button class="btn-modal btn-view-orders" (click)="viewAllOrders()">
+          <span class="material-icons">receipt_long</span>
+          View in My Purchases
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>

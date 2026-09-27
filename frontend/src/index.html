@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <!-- SEO: Page title for the ecommerce application -->
+  <title>ShopWave — Premium Ecommerce</title>
+  <base href="/">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- SEO: Description for search engines -->
+  <meta name="description" content="ShopWave — Create your account and start shopping premium products online.">
+  <!-- SEO: Open Graph tags -->
+  <meta property="og:title" content="ShopWave — Premium Ecommerce">
+  <meta property="og:description" content="Create your account and start shopping premium products.">
+  <meta property="og:type" content="website">
+  <!-- Favicon -->
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <!-- Google Fonts: Inter for body text, Outfit for headings — premium modern typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Material Icons for UI icons (no npm package needed) -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <!-- Inline theme initialization script to prevent FOUC -->
+  <script>
+    (function() {
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme === 'light') {
+        document.documentElement.setAttribute('data-theme', 'light');
+      } else if (savedTheme === 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+        document.documentElement.setAttribute('data-theme', 'light');
+      } else {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
+    })();
+  </script>
+</head>
+<body>
+  <!-- Angular root component mounts here -->
+  <app-root></app-root>
+</body>
+</html>

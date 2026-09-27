@@ -1,0 +1,45 @@
+/*
+ * themes.scss — Theme Token Bridge for ShopWave E-Commerce
+ * Keeps legacy/secondary components synchronized with the master design system in styles.css
+ */
+:root {
+  /* Light Theme Variables (Default) */
+  --primary-color: #2563eb;
+  --bg-surface: #ffffff;
+  --bg-input: #ffffff;
+  --bg-muted: #f1f5f9;
+  --bg-hover: rgba(0, 0, 0, 0.04);
+  --bg-disabled: #94a3b8;
+  --text-color: #0f172a;
+  --text-muted: #64748b;
+  --border-color: #e2e8f0;
+  --danger-color: #ef4444;
+  --star-color: #cbd5e1;
+  --star-filled: #f59e0b;
+  --skeleton-base: #f1f5f9;
+  --skeleton-highlight: #e2e8f0;
+}
+
+[data-theme='dark'] {
+  /* Dark Theme Variables */
+  --primary-color: #60a5fa;
+  --bg-surface: #131b2e;
+  --bg-input: #1e293b;
+  --bg-muted: #0b0f19;
+  --bg-hover: rgba(255, 255, 255, 0.08);
+  --bg-disabled: #334155;
+  --text-color: #f8fafc;
+  --text-muted: #94a3b8;
+  --border-color: rgba(255, 255, 255, 0.1);
+  --danger-color: #ef4444;
+  --star-color: #475569;
+  --star-filled: #f59e0b;
+  --skeleton-base: #1e293b;
+  --skeleton-highlight: #334155;
+
+  body {
+    background-color: var(--color-bg-primary);
+    color: var(--color-text-primary);
+  }
+}
+

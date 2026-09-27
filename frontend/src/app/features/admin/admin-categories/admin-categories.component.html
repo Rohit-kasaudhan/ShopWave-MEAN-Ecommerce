@@ -1,0 +1,83 @@
+<div class="admin-section">
+  <div class="section-header">
+    <div class="section-meta">
+      <span class="section-count">{{ filteredCategories.length }} of {{ categories.length }} Categories</span>
+    </div>
+
+    <div class="header-controls">
+      <div class="search-box">
+        <span class="material-icons search-icon">search</span>
+        <input
+          type="text"
+          placeholder="Search categories..."
+          [(ngModel)]="searchQuery"
+          (ngModelChange)="applyFilter()"
+          class="search-input"
+        />
+      </div>
+
+      <button class="btn-create" (click)="openCreate()">
+        <span class="material-icons">add</span> Add Category
+      </button>
+    </div>
+  </div>
+
+  <!-- Form Modal -->
+  <div class="form-overlay" *ngIf="showForm" (click)="closeForm()">
+    <div class="form-panel" (click)="$event.stopPropagation()">
+      <div class="form-header">
+        <h3>{{ editingCategory ? 'Edit Category' : 'New Category' }}</h3>
+        <button class="btn-close" (click)="closeForm()"><span class="material-icons">close</span></button>
+      </div>
+      <form [formGroup]="form" (ngSubmit)="submit()" class="admin-form">
+        <div class="form-group">
+          <label>Category Name *</label>
+          <input formControlName="name" class="form-control" placeholder="e.g. Footwear, Electronics, Accessories" />
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn-cancel" (click)="closeForm()">Cancel</button>
+          <button type="submit" class="btn-submit" [disabled]="isSubmitting">
+            <span class="spinner" *ngIf="isSubmitting"></span> Save Category
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="loading-state" *ngIf="isLoading">
+    <div class="spinner" style="width:40px;height:40px;border-width:3px"></div>
+  </div>
+
+  <div class="table-wrapper" *ngIf="!isLoading">
+    <table class="admin-table" *ngIf="filteredCategories.length > 0">
+      <thead>
+        <tr>
+          <th>Category Name</th>
+          <th>Slug</th>
+          <th>Created Date</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let cat of filteredCategories">
+          <td class="category-name-cell">
+            <span class="cat-icon-badge">
+              <span class="material-icons">folder</span>
+            </span>
+            <span class="cat-name-text">{{ cat.name }}</span>
+          </td>
+          <td><span class="slug-tag">{{ cat.slug }}</span></td>
+          <td>{{ cat.createdAt | date:'mediumDate' }}</td>
+          <td class="actions-cell">
+            <button class="btn-edit" (click)="openEdit(cat)" title="Edit Category"><span class="material-icons">edit</span></button>
+            <button class="btn-delete" (click)="delete(cat._id)" title="Delete Category"><span class="material-icons">delete</span></button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="empty-state" *ngIf="filteredCategories.length === 0">
+      <span class="material-icons empty-icon">category</span>
+      <p>No categories matching search criteria.</p>
+    </div>
+  </div>
+</div>

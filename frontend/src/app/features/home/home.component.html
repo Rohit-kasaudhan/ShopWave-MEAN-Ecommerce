@@ -1,0 +1,309 @@
+<!-- ═══════════════════════════════════════════════════
+     HERO SECTION
+════════════════════════════════════════════════════ -->
+<section class="hero">
+  <div class="hero-bg-orbs">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+  </div>
+
+  <div class="hero-content">
+    <div class="hero-badge">
+      <span class="material-icons">local_fire_department</span>
+      New Season Collection 2025
+    </div>
+
+    <h1 class="hero-title">
+      Experience Next-Gen<br />
+      Shopping with <span class="gradient-text">ShopWave</span>
+    </h1>
+
+    <p class="hero-subtitle">
+      Discover curated premium products, exclusive flash deals, and lightning-fast delivery brought directly to your doorstep.
+    </p>
+
+    <!-- Hero Search Bar -->
+    <form class="hero-search-bar" (ngSubmit)="onHeroSearch()">
+      <span class="material-icons search-icon">search</span>
+      <input
+        type="text"
+        [(ngModel)]="heroSearchQuery"
+        name="heroSearch"
+        placeholder="Search clothes, electronics, shoes..."
+        class="hero-search-input"
+      />
+      <button type="submit" class="btn-hero-search">
+        Search
+        <span class="material-icons">arrow_forward</span>
+      </button>
+    </form>
+
+    <div class="hero-actions">
+      <button class="btn btn-hero-primary" (click)="goToProducts()">
+        <span class="material-icons">storefront</span>
+        Explore Catalog
+      </button>
+      <button class="btn btn-hero-secondary" (click)="goToProducts()">
+        <span class="material-icons">bolt</span>
+        Flash Deals
+      </button>
+    </div>
+
+    <!-- Stats -->
+    <div class="hero-stats">
+      <div class="stat-item" *ngFor="let s of stats">
+        <span class="material-icons stat-icon">{{ s.icon }}</span>
+        <div class="stat-meta">
+          <span class="stat-value">{{ s.value }}</span>
+          <span class="stat-label">{{ s.label }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero-visual">
+    <div class="hero-card-stack">
+      <div class="hero-card hero-card-1">
+        <div class="card-icon-badge">
+          <span class="material-icons">diamond</span>
+        </div>
+        <div class="card-text">
+          <span class="card-title">Premium Quality</span>
+          <span class="card-sub">Handpicked Collection</span>
+        </div>
+      </div>
+
+      <div class="hero-card hero-card-2">
+        <div class="card-icon-badge accent">
+          <span class="material-icons">verified</span>
+        </div>
+        <div class="card-text">
+          <span class="card-title">100% Authentic</span>
+          <span class="card-sub">Official Warranty</span>
+        </div>
+      </div>
+
+      <div class="hero-card hero-card-3">
+        <div class="card-icon-badge success">
+          <span class="material-icons">local_shipping</span>
+        </div>
+        <div class="card-text">
+          <span class="card-title">Express Delivery</span>
+          <span class="card-sub">24-48 Hours Dispatch</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════
+     FLASH SALE BANNER
+════════════════════════════════════════════════════ -->
+<section class="flash-sale-wrapper">
+  <div class="flash-sale-banner">
+    <div class="flash-left">
+      <div class="flash-tag">
+        <span class="material-icons">bolt</span>
+        FLASH SALE
+      </div>
+      <h3>Limited Time Discounts — Up to <span class="discount-accent">50% OFF</span></h3>
+      <p>Hurry! Exclusive offers end when the timer runs out.</p>
+    </div>
+
+    <div class="flash-right">
+      <div class="timer-display">
+        <div class="time-block">
+          <span class="time-num">{{ timerHours }}</span>
+          <span class="time-unit">Hours</span>
+        </div>
+        <span class="timer-colon">:</span>
+        <div class="time-block">
+          <span class="time-num">{{ timerMinutes }}</span>
+          <span class="time-unit">Mins</span>
+        </div>
+        <span class="timer-colon">:</span>
+        <div class="time-block">
+          <span class="time-num">{{ timerSeconds }}</span>
+          <span class="time-unit">Secs</span>
+        </div>
+      </div>
+
+      <button class="btn-flash-action" (click)="goToProducts()">
+        Shop Deals Now
+        <span class="material-icons">arrow_forward</span>
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════
+     CATEGORIES SECTION
+════════════════════════════════════════════════════ -->
+<section class="section categories-section" *ngIf="categories.length">
+  <div class="section-header">
+    <div>
+      <h2 class="section-title">Shop by <span class="gradient-text">Category</span></h2>
+      <p class="section-subtitle">Browse curated collections tailored for your lifestyle</p>
+    </div>
+    <button class="btn-view-all" (click)="goToProducts()">
+      Explore All <span class="material-icons">arrow_forward</span>
+    </button>
+  </div>
+
+  <div class="categories-grid">
+    <div
+      class="category-card"
+      *ngFor="let cat of categories"
+      (click)="searchByCategory(cat._id)"
+    >
+      <div class="category-icon">
+        <span class="material-icons">{{ getCategoryIcon(cat.name) }}</span>
+      </div>
+      <span class="category-name">{{ cat.name }}</span>
+      <span class="category-cta">Explore &rarr;</span>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════
+     FEATURED PRODUCTS SECTION WITH TABS
+════════════════════════════════════════════════════ -->
+<section class="section products-section">
+  <div class="section-header">
+    <div>
+      <h2 class="section-title">Trending <span class="gradient-text">Products</span></h2>
+      <p class="section-subtitle">Top rated items customer loved this week</p>
+    </div>
+
+    <!-- Filter Tabs -->
+    <div class="product-tabs">
+      <button
+        class="tab-btn"
+        [class.active]="activeProductTab === 'all'"
+        (click)="filterTab('all')"
+      >
+        All Items
+      </button>
+      <button
+        class="tab-btn"
+        [class.active]="activeProductTab === 'featured'"
+        (click)="filterTab('featured')"
+      >
+        In Stock
+      </button>
+      <button
+        class="tab-btn"
+        [class.active]="activeProductTab === 'sale'"
+        (click)="filterTab('sale')"
+      >
+        Best Value
+      </button>
+    </div>
+  </div>
+
+  <!-- Skeleton Loading -->
+  <div class="products-grid" *ngIf="isLoading">
+    <div class="skeleton-card" *ngFor="let i of [1,2,3,4,5,6,7,8]">
+      <div class="skeleton-image"></div>
+      <div class="skeleton-body">
+        <div class="skeleton-line w-30"></div>
+        <div class="skeleton-line w-80"></div>
+        <div class="skeleton-line w-60"></div>
+        <div class="skeleton-footer">
+          <div class="skeleton-line w-40"></div>
+          <div class="skeleton-btn"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Products Grid -->
+  <div class="products-grid" *ngIf="!isLoading">
+    <app-product-card
+      *ngFor="let p of displayProducts"
+      [product]="p"
+    ></app-product-card>
+  </div>
+
+  <!-- Empty State -->
+  <div class="empty-state" *ngIf="!isLoading && displayProducts.length === 0">
+    <span class="material-icons empty-icon">inventory_2</span>
+    <h3>No Products Found</h3>
+    <p>Check back soon for new arrivals!</p>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════
+     VALUE PROPOSITION SECTION (CX CENTERPIECE)
+════════════════════════════════════════════════════ -->
+<section class="section value-props-section">
+  <div class="section-header center">
+    <h2 class="section-title">Why Shop With <span class="gradient-text">ShopWave</span>?</h2>
+    <p class="section-subtitle">We prioritize customer satisfaction at every step</p>
+  </div>
+
+  <div class="value-props-grid">
+    <div class="prop-card" *ngFor="let item of valueProps">
+      <div class="prop-icon-box">
+        <span class="material-icons">{{ item.icon }}</span>
+      </div>
+      <h3>{{ item.title }}</h3>
+      <p>{{ item.desc }}</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════
+     CUSTOMER TESTIMONIALS SECTION
+════════════════════════════════════════════════════ -->
+<section class="section testimonials-section">
+  <div class="section-header center">
+    <h2 class="section-title">Loved by <span class="gradient-text">Thousands</span></h2>
+    <p class="section-subtitle">See what our verified buyers have to say</p>
+  </div>
+
+  <div class="testimonials-grid">
+    <div class="testimonial-card" *ngFor="let t of testimonials">
+      <div class="rating-stars">
+        <span class="material-icons star" *ngFor="let s of [1,2,3,4,5]">star</span>
+      </div>
+      <p class="comment-text">"{{ t.comment }}"</p>
+      <div class="user-profile">
+        <img [src]="t.avatar" [alt]="t.name" class="user-avatar" />
+        <div class="user-info">
+          <span class="user-name">{{ t.name }}</span>
+          <span class="user-role">{{ t.role }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════
+     VIP NEWSLETTER BANNER
+════════════════════════════════════════════════════ -->
+<section class="promo-banner">
+  <div class="promo-content">
+    <span class="vip-badge">
+      <span class="material-icons">card_membership</span>
+      VIP INSIDER CLUB
+    </span>
+    <h2>Get 15% Off Your First Purchase!</h2>
+    <p>Subscribe to our newsletter to receive secret deals, new drops, and instant promo codes.</p>
+
+    <form class="newsletter-form" (ngSubmit)="subscribeNewsletter()">
+      <input
+        type="email"
+        placeholder="Enter your email address..."
+        [(ngModel)]="newsletterEmail"
+        name="newsletterEmail"
+        class="newsletter-input"
+      />
+      <button type="submit" class="btn-newsletter-submit" [disabled]="isSubscribing">
+        <span class="spinner" *ngIf="isSubscribing"></span>
+        <span>Claim 15% Off</span>
+      </button>
+    </form>
+  </div>
+</section>

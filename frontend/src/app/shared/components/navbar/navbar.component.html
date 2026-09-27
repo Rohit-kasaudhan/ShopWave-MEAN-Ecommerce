@@ -1,0 +1,188 @@
+<!-- Announcement Top Bar -->
+<div class="announcement-bar" *ngIf="showAnnouncement">
+  <div class="announcement-content">
+    <span class="material-icons ann-icon">local_fire_department</span>
+    <span>✨ <strong>FREE EXPRESS DISPATCH</strong> ON ORDERS OVER $50 • USE CODE <strong>SAVE15</strong> FOR 15% OFF</span>
+  </div>
+  <button class="ann-close" (click)="dismissAnnouncement()" title="Close announcement">
+    <span class="material-icons">close</span>
+  </button>
+</div>
+
+<!-- Main Header Navbar -->
+<nav class="navbar" [class.scrolled]="isScrolled" [class.has-announcement]="showAnnouncement">
+  <div class="navbar-container">
+    <!-- Brand Logo -->
+    <a routerLink="/home" class="navbar-logo">
+      <div class="logo-badge">
+        <span class="logo-icon">⚡</span>
+      </div>
+      <span class="logo-text">Shop<span class="logo-accent">Wave</span></span>
+    </a>
+
+    <!-- Desktop Navigation Links -->
+    <ul class="navbar-links">
+      <li>
+        <a routerLink="/home" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">
+          Home
+        </a>
+      </li>
+      <li>
+        <a routerLink="/products" routerLinkActive="active">
+          Products
+        </a>
+      </li>
+      <li *ngIf="isLoggedIn$ | async">
+        <a routerLink="/orders" routerLinkActive="active">
+          My Orders
+        </a>
+      </li>
+    </ul>
+
+    <!-- Quick Search Input (Desktop) -->
+    <form class="navbar-quick-search" (ngSubmit)="onSearchSubmit()">
+      <span class="material-icons search-icon">search</span>
+      <input
+        type="text"
+        placeholder="Quick search products..."
+        [(ngModel)]="searchQuery"
+        name="navSearchQuery"
+        class="quick-search-input"
+      />
+    </form>
+
+    <!-- Right Actions -->
+    <div class="navbar-actions">
+      <!-- Cart Link Button -->
+      <a routerLink="/cart" routerLinkActive="active" class="btn-cart-nav" *ngIf="isLoggedIn$ | async">
+        <span class="material-icons">shopping_bag</span>
+        <span class="cart-label">Cart</span>
+        <span class="cart-badge-pill" *ngIf="(cartCount$ | async)! > 0">{{ cartCount$ | async }}</span>
+      </a>
+
+      <!-- Theme Switcher -->
+      <app-theme-toggle></app-theme-toggle>
+
+      <!-- Admin Quick Button -->
+      <a *ngIf="(currentUser$ | async)?.role === 'admin'" routerLink="/admin" class="btn-admin">
+        <span class="material-icons">admin_panel_settings</span>
+        <span>Admin</span>
+      </a>
+
+      <!-- User Profile Menu -->
+      <div class="user-menu" *ngIf="isLoggedIn$ | async; else authButtons">
+        <button class="user-avatar-btn" (click)="toggleUserMenu()" id="userMenuToggle">
+          <div class="avatar-circle">
+            <span class="avatar-initial">{{ (currentUser$ | async)?.FirstName?.charAt(0) || 'U' }}</span>
+          </div>
+          <span class="user-name">{{ (currentUser$ | async)?.FirstName }}</span>
+          <span class="material-icons dropdown-caret">expand_more</span>
+        </button>
+
+        <!-- Dropdown Menu -->
+        <div class="user-dropdown" [class.open]="isUserMenuOpen">
+          <div class="dropdown-header">
+            <div class="user-header-info">
+              <span class="header-name">{{ (currentUser$ | async)?.FirstName }} {{ (currentUser$ | async)?.LastName }}</span>
+              <span class="header-email">{{ (currentUser$ | async)?.email }}</span>
+            </div>
+            <span class="role-badge" [class.admin]="(currentUser$ | async)?.role === 'admin'">
+              {{ (currentUser$ | async)?.role | uppercase }}
+            </span>
+          </div>
+
+          <div class="dropdown-divider"></div>
+
+          <a routerLink="/orders" class="dropdown-item" (click)="closeUserMenu()">
+            <span class="material-icons">receipt_long</span>
+            <span>My Orders</span>
+          </a>
+
+          <a routerLink="/cart" class="dropdown-item" (click)="closeUserMenu()">
+            <span class="material-icons">shopping_bag</span>
+            <span>Shopping Cart</span>
+          </a>
+
+          <a routerLink="/admin" class="dropdown-item" (click)="closeUserMenu()" *ngIf="(currentUser$ | async)?.role === 'admin'">
+            <span class="material-icons">dashboard</span>
+            <span>Admin Dashboard</span>
+          </a>
+
+          <div class="dropdown-divider"></div>
+
+          <button class="dropdown-item text-danger" (click)="logout()">
+            <span class="material-icons">logout</span>
+            <span>Sign Out</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Auth Action Buttons (Logged Out) -->
+      <ng-template #authButtons>
+        <div class="auth-btns">
+          <a routerLink="/login" class="btn-outline">Sign In</a>
+          <a routerLink="/register" class="btn-filled">Register</a>
+        </div>
+      </ng-template>
+
+      <!-- Mobile Hamburger Toggle -->
+      <button class="mobile-toggle" (click)="toggleMobileMenu()" id="mobileMenuToggle">
+        <span class="material-icons">{{ isMobileMenuOpen ? 'close' : 'menu' }}</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile Drawer Menu -->
+  <div class="mobile-menu" [class.open]="isMobileMenuOpen">
+    <!-- Search in Mobile Menu -->
+    <form class="mobile-search-form" (ngSubmit)="onSearchSubmit()">
+      <span class="material-icons">search</span>
+      <input
+        type="text"
+        placeholder="Search catalog..."
+        [(ngModel)]="searchQuery"
+        name="mobileSearch"
+        class="mobile-search-input"
+      />
+    </form>
+
+    <div class="mobile-theme-row">
+      <div class="mobile-theme-label">
+        <span class="material-icons">palette</span>
+        <span>Appearance</span>
+      </div>
+      <app-theme-toggle></app-theme-toggle>
+    </div>
+
+    <a routerLink="/home" routerLinkActive="active" (click)="closeMobileMenu()">
+      <span class="material-icons">home</span> Home
+    </a>
+    <a routerLink="/products" routerLinkActive="active" (click)="closeMobileMenu()">
+      <span class="material-icons">storefront</span> Products
+    </a>
+    <a routerLink="/cart" routerLinkActive="active" (click)="closeMobileMenu()" *ngIf="isLoggedIn$ | async">
+      <span class="material-icons">shopping_bag</span> My Cart
+      <span class="cart-badge-mobile" *ngIf="(cartCount$ | async)! > 0">{{ cartCount$ | async }}</span>
+    </a>
+    <a routerLink="/orders" routerLinkActive="active" (click)="closeMobileMenu()" *ngIf="isLoggedIn$ | async">
+      <span class="material-icons">receipt_long</span> My Orders
+    </a>
+    <a routerLink="/admin" routerLinkActive="active" (click)="closeMobileMenu()" *ngIf="(currentUser$ | async)?.role === 'admin'">
+      <span class="material-icons">admin_panel_settings</span> Admin Panel
+    </a>
+
+    <div class="mobile-divider" *ngIf="isLoggedIn$ | async"></div>
+
+    <button class="mobile-logout" (click)="logout()" *ngIf="isLoggedIn$ | async">
+      <span class="material-icons">logout</span> Sign Out
+    </button>
+
+    <div class="mobile-auth" *ngIf="!(isLoggedIn$ | async)">
+      <a routerLink="/login" class="btn-outline mobile-btn" (click)="closeMobileMenu()">Sign In</a>
+      <a routerLink="/register" class="btn-filled mobile-btn" (click)="closeMobileMenu()">Register</a>
+    </div>
+  </div>
+</nav>
+
+<!-- Dynamic Spacer based on Announcement state -->
+<div class="navbar-spacer" [class.has-announcement]="showAnnouncement"></div>

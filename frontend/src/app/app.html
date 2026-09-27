@@ -1,0 +1,21 @@
+<!--
+  app.html — Root Application Template
+  
+  This is the shell template for the Angular application.
+  It simply provides the <router-outlet> where Angular injects
+  the currently matched route component.
+  
+  No navbar or shared UI here — each auth page is self-contained
+  and handles its own full-page layout.
+-->
+
+<!-- Navbar -->
+<app-navbar></app-navbar>
+
+<!-- Main Router Outlet -->
+<main>
+  <router-outlet></router-outlet>
+</main>
+
+<!-- Global Toast Notifications -->
+<app-toast></app-toast>

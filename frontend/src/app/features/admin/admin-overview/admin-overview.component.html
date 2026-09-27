@@ -1,0 +1,292 @@
+<div class="admin-overview">
+  <!-- Slim loading bar at top instead of blocking full view -->
+  <div class="slim-loader" *ngIf="isLoading">
+    <div class="slim-loader-bar"></div>
+  </div>
+
+  <div class="overview-content">
+    <!-- Welcome Header Banner -->
+    <div class="welcome-banner">
+      <div class="banner-text">
+        <h2>Dashboard Analytics & Store Intelligence</h2>
+        <p>Monitor real-time revenue trends, inventory alerts, order volume distribution, and category performance.</p>
+      </div>
+      <div class="banner-badge">
+        <span class="pulse-dot"></span>
+        <span>Live System Online</span>
+      </div>
+    </div>
+
+    <!-- KPI Stats Cards Grid -->
+    <div class="kpi-grid">
+      <!-- Total Revenue -->
+      <div class="kpi-card revenue-card">
+        <div class="kpi-icon">
+          <span class="material-icons">attach_money</span>
+        </div>
+        <div class="kpi-info">
+          <span class="kpi-label">Total Revenue</span>
+          <span class="kpi-value">${{ totalRevenue | number:'1.2-2' }}</span>
+          <span class="kpi-subtext">From {{ orders.length }} total orders</span>
+        </div>
+      </div>
+
+      <!-- Orders Stats -->
+      <div class="kpi-card orders-card" (click)="goToTab('orders')">
+        <div class="kpi-icon">
+          <span class="material-icons">shopping_bag</span>
+        </div>
+        <div class="kpi-info">
+          <span class="kpi-label">Total Orders</span>
+          <span class="kpi-value">{{ orders.length }}</span>
+          <span class="kpi-subtext alert-text" *ngIf="pendingOrdersCount > 0">
+            <span class="material-icons sub-icon">warning</span>
+            {{ pendingOrdersCount }} Pending Action
+          </span>
+          <span class="kpi-subtext" *ngIf="pendingOrdersCount === 0">All orders processed</span>
+        </div>
+      </div>
+
+      <!-- Products Stats -->
+      <div class="kpi-card products-card" (click)="goToTab('products')">
+        <div class="kpi-icon">
+          <span class="material-icons">inventory_2</span>
+        </div>
+        <div class="kpi-info">
+          <span class="kpi-label">Catalog Products</span>
+          <span class="kpi-value">{{ products.length }}</span>
+          <span class="kpi-subtext alert-text" *ngIf="lowStockProducts.length > 0">
+            <span class="material-icons sub-icon">error_outline</span>
+            {{ lowStockProducts.length }} Low Stock Alerts
+          </span>
+          <span class="kpi-subtext" *ngIf="lowStockProducts.length === 0">Inventory Healthy</span>
+        </div>
+      </div>
+
+      <!-- Total Users -->
+      <div class="kpi-card users-card" (click)="goToTab('users')">
+        <div class="kpi-icon">
+          <span class="material-icons">people</span>
+        </div>
+        <div class="kpi-info">
+          <span class="kpi-label">Registered Users</span>
+          <span class="kpi-value">{{ users.length }}</span>
+          <span class="kpi-subtext">Across {{ categoriesCount }} categories</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Interactive Analytics Section: Revenue Curve + Order Status ──── -->
+    <div class="analytics-charts-grid">
+      <!-- Revenue Trend Interactive Chart -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <div class="chart-title-group">
+            <span class="material-icons chart-icon">show_chart</span>
+            <div>
+              <h3>Daily Revenue Trend</h3>
+              <p class="chart-subtitle">Sales volume over the last 7 days</p>
+            </div>
+          </div>
+          <div class="chart-legend-badge">
+            <span class="legend-dot"></span>
+            <span>Peak: ${{ maxDailyRevenue | number:'1.0-0' }}</span>
+          </div>
+        </div>
+
+        <div class="svg-chart-wrapper">
+          <svg viewBox="0 0 600 200" class="revenue-svg">
+            <defs>
+              <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="var(--color-accent)" stop-opacity="0.35" />
+                <stop offset="100%" stop-color="var(--color-accent)" stop-opacity="0.0" />
+              </linearGradient>
+            </defs>
+
+            <!-- Horizontal Grid Lines -->
+            <line x1="45" y1="20" x2="555" y2="20" class="grid-line" />
+            <line x1="45" y1="87" x2="555" y2="87" class="grid-line" />
+            <line x1="45" y1="155" x2="555" y2="155" class="grid-line" />
+
+            <!-- Area Fill Under Path -->
+            <path [attr.d]="svgAreaPath" fill="url(#revenueGradient)" />
+
+            <!-- Bezier Curve Trend Line -->
+            <path [attr.d]="svgLinePath" fill="none" stroke="var(--color-accent)" stroke-width="3.5" class="chart-path" />
+
+            <!-- Interactive Data Points & Hover Circles -->
+            <g *ngFor="let point of dailyRevenueList">
+              <circle
+                [attr.cx]="point.x"
+                [attr.cy]="point.y"
+                r="5"
+                class="data-circle"
+                [class.active]="hoveredDataPoint === point"
+                (mouseenter)="hoveredDataPoint = point"
+                (mouseleave)="hoveredDataPoint = null"
+              />
+              <text [attr.x]="point.x" y="185" text-anchor="middle" class="axis-label">
+                {{ point.dayLabel }}
+              </text>
+            </g>
+          </svg>
+
+          <!-- Interactive Tooltip Overlay -->
+          <div
+            class="chart-tooltip"
+            *ngIf="hoveredDataPoint"
+            [style.left.px]="hoveredDataPoint.x"
+            [style.top.px]="hoveredDataPoint.y - 45"
+          >
+            <span class="tooltip-date">{{ hoveredDataPoint.dateStr }}</span>
+            <span class="tooltip-revenue">${{ hoveredDataPoint.revenue | number:'1.2-2' }}</span>
+            <span class="tooltip-orders">({{ hoveredDataPoint.ordersCount }} orders)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Order Status Breakdown & Category Distribution -->
+      <div class="distribution-card">
+        <div class="chart-header">
+          <div class="chart-title-group">
+            <span class="material-icons chart-icon">pie_chart</span>
+            <div>
+              <h3>Order Status Breakdown</h3>
+              <p class="chart-subtitle">Distribution by fulfillment status</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="status-dist-list">
+          <div class="dist-item" *ngFor="let item of orderStatusDist">
+            <div class="dist-header">
+              <span class="dist-label" [style.color]="item.color">
+                <span class="status-dot" [style.background]="item.color"></span>
+                {{ item.label }}
+              </span>
+              <span class="dist-values">{{ item.count }} orders ({{ item.percentage }}%)</span>
+            </div>
+            <div class="dist-bar-bg">
+              <div
+                class="dist-bar-fill"
+                [style.width.%]="item.percentage"
+                [style.background]="item.color"
+              ></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Top Category Performance Mini-Progress -->
+        <div class="top-categories-box" *ngIf="topCategories.length > 0">
+          <h4>Top Product Categories</h4>
+          <div class="cat-progress-grid">
+            <div class="cat-pill" *ngFor="let cat of topCategories">
+              <span class="cat-name">{{ cat.name }}</span>
+              <span class="cat-count">{{ cat.count }} items</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Action Bar -->
+    <div class="quick-actions-bar">
+      <span class="actions-title">Quick Actions:</span>
+      <button class="action-chip" (click)="goToTab('products')">
+        <span class="material-icons">add</span> Add Product
+      </button>
+      <button class="action-chip" (click)="goToTab('categories')">
+        <span class="material-icons">category</span> Manage Categories
+      </button>
+      <button class="action-chip" (click)="goToTab('users')">
+        <span class="material-icons">person_add</span> Create User
+      </button>
+      <button class="action-chip" (click)="goToTab('orders')">
+        <span class="material-icons">receipt</span> View All Orders
+      </button>
+    </div>
+
+    <!-- Split Grid: Recent Orders & Inventory Alerts -->
+    <div class="dashboard-split">
+      <!-- Recent Orders Table -->
+      <div class="split-card orders-section">
+        <div class="card-header">
+          <div class="header-title">
+            <span class="material-icons header-icon">schedule</span>
+            <h3>Recent Orders</h3>
+          </div>
+          <button class="btn-link" (click)="goToTab('orders')">View All →</button>
+        </div>
+
+        <div class="table-container">
+          <table class="overview-table" *ngIf="recentOrders.length > 0">
+            <thead>
+              <tr>
+                <th>Order</th>
+                <th>Customer</th>
+                <th>Total</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let o of recentOrders">
+                <td class="uuid-cell">#{{ o.uuid | slice:0:8 }}</td>
+                <td>{{ o.user?.FirstName }} {{ o.user?.LastName }}</td>
+                <td class="price-cell">${{ o.totalPrice | number:'1.2-2' }}</td>
+                <td>
+                  <span class="status-pill" [style.color]="getStatusColor(o.status)">
+                    {{ o.status | uppercase }}
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="empty-hint" *ngIf="recentOrders.length === 0">
+            <p>No recent orders found.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Inventory Low Stock Alerts Hub with Inline Quick Restock -->
+      <div class="split-card inventory-section">
+        <div class="card-header">
+          <div class="header-title">
+            <span class="material-icons header-icon alert-icon">warning_amber</span>
+            <h3>Low Stock Inventory Hub</h3>
+          </div>
+          <button class="btn-link" (click)="goToTab('products')">Manage →</button>
+        </div>
+
+        <div class="stock-list" *ngIf="lowStockProducts.length > 0">
+          <div class="stock-item" *ngFor="let p of lowStockProducts">
+            <img [src]="p.images?.[0]?.url || 'assets/placeholder.png'" [alt]="p.name" class="stock-img" />
+            <div class="stock-details">
+              <span class="stock-name">{{ p.name }}</span>
+              <span class="stock-price">${{ p.price | number:'1.2-2' }}</span>
+            </div>
+            <div class="stock-actions">
+              <div class="stock-badge" [class.out-of-stock]="p.stock === 0">
+                {{ p.stock === 0 ? 'Out of Stock' : p.stock + ' left' }}
+              </div>
+              <button
+                class="btn-quick-restock"
+                [disabled]="isRestockingMap[p.uuid]"
+                (click)="quickRestock(p, 10)"
+                title="Quickly add 10 units to inventory"
+              >
+                <span class="material-icons" *ngIf="!isRestockingMap[p.uuid]">add_circle_outline</span>
+                <span>{{ isRestockingMap[p.uuid] ? 'Restocking...' : '+10 Restock' }}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="empty-hint" *ngIf="lowStockProducts.length === 0">
+          <span class="material-icons check-icon">check_circle</span>
+          <p>All product stock levels are healthy!</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+

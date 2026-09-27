@@ -1,0 +1,29 @@
+<!--
+  dashboard.component.html — Dashboard Placeholder
+  Shown after successful login/verification.
+-->
+<div class="dashboard-page" id="dashboard-page">
+  <div class="dashboard-card">
+    <div class="success-icon" aria-hidden="true">
+      <span class="material-icons">check_circle</span>
+    </div>
+    <h1 class="dashboard-title">You're in! 🎉</h1>
+    <p class="dashboard-subtitle">
+      Welcome to <strong>ShopWave</strong>. Your account is active and ready to use.
+    </p>
+    <div class="dashboard-actions">
+      <button
+        type="button"
+        class="btn btn-primary logout-btn"
+        id="logout-btn"
+        (click)="logout()"
+      >
+        <span class="material-icons" aria-hidden="true">logout</span>
+        Sign Out
+      </button>
+    </div>
+    <p class="dashboard-hint text-muted text-sm">
+      This is a placeholder dashboard. Your full ecommerce UI will go here.
+    </p>
+  </div>
+</div>

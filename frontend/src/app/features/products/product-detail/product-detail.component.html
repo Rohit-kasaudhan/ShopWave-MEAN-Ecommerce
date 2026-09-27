@@ -1,0 +1,282 @@
+<!-- Product Detail Page -->
+
+<!-- Loading Skeleton -->
+<div class="detail-page" *ngIf="isLoading">
+  <div class="detail-skeleton">
+    <div class="skeleton-gallery">
+      <div class="skeleton-main-img"></div>
+      <div class="skeleton-thumbs">
+        <div class="skeleton-thumb" *ngFor="let i of [1,2,3]"></div>
+      </div>
+    </div>
+    <div class="skeleton-info">
+      <div class="skeleton-line w-20"></div>
+      <div class="skeleton-line w-70" style="height:2.5rem"></div>
+      <div class="skeleton-line w-90"></div>
+      <div class="skeleton-line w-80"></div>
+      <div class="skeleton-line w-30" style="height:3rem; margin-top:1rem"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Product Detail Content -->
+<div class="detail-page" *ngIf="!isLoading && product">
+  <!-- Breadcrumb Navigation -->
+  <nav class="breadcrumb-nav">
+    <a routerLink="/home" class="breadcrumb-item">Home</a>
+    <span class="breadcrumb-sep">/</span>
+    <a routerLink="/products" class="breadcrumb-item">Products</a>
+    <span class="breadcrumb-sep">/</span>
+    <span class="breadcrumb-item active">{{ categoryName }}</span>
+  </nav>
+
+  <div class="detail-grid">
+    <!-- ── Left: Image Gallery & Zoom ─────────────────────────────── -->
+    <div class="gallery">
+      <div class="main-image-wrapper">
+        <img [src]="mainImage" (error)="onImageError($event)" [alt]="product.name" class="main-image" />
+
+        <!-- Zoom Action Trigger -->
+        <button class="btn-zoom-trigger" (click)="openZoomModal()" title="View High-Res Image">
+          <span class="material-icons">zoom_in</span>
+        </button>
+
+        <div class="out-of-stock-overlay" *ngIf="!isInStock">
+          <span>OUT OF STOCK</span>
+        </div>
+      </div>
+
+      <!-- Thumbnail Strip -->
+      <div class="thumbnails" *ngIf="product.images.length > 1">
+        <div
+          class="thumb"
+          *ngFor="let img of product.images; let i = index"
+          [class.active]="selectedImage === i"
+          (click)="selectedImage = i"
+        >
+          <img [src]="img.url" (error)="onImageError($event)" [alt]="product.name + ' ' + i" />
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Right: Product Meta & Buying Controls ─────────────────── -->
+    <div class="detail-info">
+      <div class="category-header">
+        <span class="category-chip">{{ categoryName }}</span>
+        <span class="sku-tag">ID: #{{ product.uuid.slice(0, 8) }}</span>
+      </div>
+
+      <h1 class="detail-title">{{ product.name }}</h1>
+
+      <!-- Social Proof & Reviews -->
+      <div class="rating-row">
+        <div class="stars">
+          <span class="material-icons star" *ngFor="let s of [1,2,3,4,5]">star</span>
+        </div>
+        <span class="rating-score">4.9</span>
+        <span class="review-count">(128 Customer Reviews)</span>
+      </div>
+
+      <!-- Price & Stock Status -->
+      <div class="price-row">
+        <div class="detail-price">
+          <span class="currency">$</span>{{ product.price | number:'1.2-2' }}
+        </div>
+        <div class="stock-badge" [class.in-stock]="isInStock" [class.out-stock]="!isInStock">
+          <span class="material-icons">{{ isInStock ? 'check_circle' : 'cancel' }}</span>
+          <span *ngIf="isInStock">In Stock ({{ product.stock }} available)</span>
+          <span *ngIf="!isInStock">Out of Stock</span>
+        </div>
+      </div>
+
+      <!-- Low Stock Urgency Alert -->
+      <div class="stock-urgency-alert" *ngIf="isInStock && product.stock <= 5">
+        <span class="material-icons">local_fire_department</span>
+        <span>Hurry! Only <strong>{{ product.stock }} item(s)</strong> remaining in stock.</span>
+      </div>
+
+      <p class="detail-desc">{{ product.description }}</p>
+
+      <div class="detail-divider"></div>
+
+      <!-- Color Selection -->
+      <div class="option-group" *ngIf="product.colors?.length">
+        <label class="option-label">Select Color: <strong>{{ selectedColor }}</strong></label>
+        <div class="color-swatches">
+          <button
+            class="color-swatch"
+            *ngFor="let c of product.colors"
+            [style.background]="c"
+            [class.selected]="selectedColor === c"
+            (click)="selectedColor = c"
+            [title]="c"
+          ></button>
+        </div>
+      </div>
+
+      <!-- Size Selection -->
+      <div class="option-group" *ngIf="product.sizes?.length">
+        <label class="option-label">Select Size: <strong>{{ selectedSize }}</strong></label>
+        <div class="size-options">
+          <button
+            class="size-btn"
+            *ngFor="let s of product.sizes"
+            [class.selected]="selectedSize === s"
+            (click)="selectedSize = s"
+          >{{ s }}</button>
+        </div>
+      </div>
+
+      <!-- Quantity Selection -->
+      <div class="option-group">
+        <label class="option-label">Quantity</label>
+        <div class="qty-control">
+          <button class="qty-btn" (click)="decrementQty()" [disabled]="quantity <= 1">
+            <span class="material-icons">remove</span>
+          </button>
+          <span class="qty-value">{{ quantity }}</span>
+          <button class="qty-btn" (click)="incrementQty()" [disabled]="quantity >= product.stock">
+            <span class="material-icons">add</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Total Price Bar -->
+      <div class="total-row">
+        <span class="total-label">Subtotal:</span>
+        <span class="total-value">${{ (product.price * quantity) | number:'1.2-2' }}</span>
+      </div>
+
+      <!-- Add to Cart CTA -->
+      <div class="action-buttons-group">
+        <button
+          class="btn-add-to-cart"
+          [disabled]="!isInStock || isAddingToCart"
+          (click)="addToCart()"
+        >
+          <span class="spinner" *ngIf="isAddingToCart"></span>
+          <span class="material-icons" *ngIf="!isAddingToCart">shopping_cart</span>
+          {{ isAddingToCart ? 'Adding to Cart...' : 'Add to Cart' }}
+        </button>
+      </div>
+
+      <!-- CX Trust Badges -->
+      <div class="cx-trust-grid">
+        <div class="trust-item">
+          <span class="material-icons">rocket_launch</span>
+          <div class="trust-text">
+            <strong>Fast Dispatch</strong>
+            <span>Ships in 24-48 hours</span>
+          </div>
+        </div>
+        <div class="trust-item">
+          <span class="material-icons">verified_user</span>
+          <div class="trust-text">
+            <strong>Authentic Guarantee</strong>
+            <span>100% genuine brand</span>
+          </div>
+        </div>
+        <div class="trust-item">
+          <span class="material-icons">replay</span>
+          <div class="trust-text">
+            <strong>Easy Returns</strong>
+            <span>30-day exchange policy</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Extra Information Tabs ─────────────────────────────────── -->
+  <div class="product-tabs-section">
+    <div class="tabs-header">
+      <button
+        class="tab-header-btn"
+        [class.active]="activeTab === 'desc'"
+        (click)="activeTab = 'desc'"
+      >
+        Description & Details
+      </button>
+      <button
+        class="tab-header-btn"
+        [class.active]="activeTab === 'specs'"
+        (click)="activeTab = 'specs'"
+      >
+        Specifications
+      </button>
+      <button
+        class="tab-header-btn"
+        [class.active]="activeTab === 'shipping'"
+        (click)="activeTab = 'shipping'"
+      >
+        Shipping & Returns
+      </button>
+    </div>
+
+    <div class="tab-body">
+      <div class="tab-content" *ngIf="activeTab === 'desc'">
+        <p>{{ product.description }}</p>
+        <ul>
+          <li>Designed for durability and everyday comfort.</li>
+          <li>Crafted from high-grade, sustainable materials.</li>
+          <li>Includes official brand authenticity certificate.</li>
+        </ul>
+      </div>
+
+      <div class="tab-content" *ngIf="activeTab === 'specs'">
+        <table class="specs-table">
+          <tr>
+            <td>Category</td>
+            <td>{{ categoryName }}</td>
+          </tr>
+          <tr>
+            <td>Reference SKU</td>
+            <td>#{{ product.uuid }}</td>
+          </tr>
+          <tr *ngIf="product.colors?.length">
+            <td>Available Colors</td>
+            <td>{{ product.colors.join(', ') }}</td>
+          </tr>
+          <tr *ngIf="product.sizes?.length">
+            <td>Available Sizes</td>
+            <td>{{ product.sizes.join(', ') }}</td>
+          </tr>
+          <tr>
+            <td>Stock Inventory</td>
+            <td>{{ product.stock }} units</td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="tab-content" *ngIf="activeTab === 'shipping'">
+        <p><strong>Shipping Policy:</strong> Standard shipping takes 3-5 business days. Express 24-hour dispatch available at checkout.</p>
+        <p><strong>Returns Policy:</strong> We offer a 30-day return policy for unused items in original packaging with full money-back guarantee.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Related Products Carousel ────────────────────────────────── -->
+  <div class="related-section" *ngIf="relatedProducts.length > 0">
+    <div class="section-header">
+      <h2>You Might Also <span class="gradient-text">Like</span></h2>
+      <button class="btn-view-all" (click)="goBack()">View Catalog &rarr;</button>
+    </div>
+
+    <div class="products-grid">
+      <app-product-card
+        *ngFor="let p of relatedProducts"
+        [product]="p"
+      ></app-product-card>
+    </div>
+  </div>
+</div>
+
+<!-- High-Res Zoom Image Modal -->
+<div class="zoom-modal-overlay" *ngIf="showZoomModal" (click)="closeZoomModal()">
+  <div class="zoom-modal-container" (click)="$event.stopPropagation()">
+    <button class="zoom-close-btn" (click)="closeZoomModal()">
+      <span class="material-icons">close</span>
+    </button>
+    <img [src]="mainImage" (error)="onImageError($event)" [alt]="product?.name" class="zoom-full-image" />
+  </div>
+</div>

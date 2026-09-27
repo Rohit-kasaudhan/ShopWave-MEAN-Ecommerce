@@ -1,0 +1,102 @@
+<div class="admin-layout" [class.sidebar-active]="sidebarOpen">
+  <!-- Mobile Sidebar Overlay -->
+  <div class="sidebar-overlay" (click)="toggleSidebar()"></div>
+
+  <!-- Sidebar -->
+  <aside class="admin-sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon">
+        <span class="material-icons">admin_panel_settings</span>
+      </div>
+      <div class="logo-text">
+        <span class="brand-name">ShopWave</span>
+        <span class="brand-badge">Control Center</span>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <button
+        class="nav-item"
+        *ngFor="let item of navItems"
+        [class.active]="activeTab === item.id"
+        (click)="setTab(item.id)"
+      >
+        <span class="material-icons nav-icon">{{ item.icon }}</span>
+        <span class="nav-label">{{ item.label }}</span>
+        <span class="active-indicator" *ngIf="activeTab === item.id"></span>
+      </button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="admin-user-card" *ngIf="currentUser">
+        <div class="user-avatar-sm">
+          {{ (currentUser.FirstName?.[0] || 'A') | uppercase }}
+        </div>
+        <div class="user-info-sm">
+          <span class="user-name-sm">{{ currentUser.FirstName }} {{ currentUser.LastName }}</span>
+          <span class="user-role-sm">Administrator</span>
+        </div>
+      </div>
+
+      <div class="footer-actions">
+        <button class="btn-store" (click)="goToStore()" title="Go to Storefront">
+          <span class="material-icons">storefront</span>
+          <span>Storefront</span>
+        </button>
+        <button class="btn-logout-sm" (click)="logout()" title="Logout">
+          <span class="material-icons">logout</span>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Content Area -->
+  <main class="admin-main">
+    <!-- Top Header Bar -->
+    <header class="admin-topbar">
+      <div class="topbar-left">
+        <button class="mobile-toggle" (click)="toggleSidebar()">
+          <span class="material-icons">menu</span>
+        </button>
+        <div class="breadcrumb">
+          <span class="bc-root">Admin</span>
+          <span class="material-icons bc-sep">chevron_right</span>
+          <span class="bc-active">{{ activeTab | titlecase }}</span>
+        </div>
+      </div>
+
+      <div class="topbar-right">
+        <button class="btn-store-pill" (click)="goToStore()">
+          <span class="material-icons">shopping_bag</span>
+          View Live Store
+        </button>
+
+        <div class="admin-profile-pill" *ngIf="currentUser">
+          <span class="status-dot"></span>
+          <span class="pill-name">{{ currentUser.FirstName }}</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Dynamic Section View -->
+    <div class="admin-content-view">
+      <!-- Overview Tab -->
+      <app-admin-overview
+        *ngIf="activeTab === 'dashboard'"
+        (navigateTab)="setTab($event)"
+      ></app-admin-overview>
+
+      <!-- Products Tab -->
+      <app-admin-products *ngIf="activeTab === 'products'"></app-admin-products>
+
+      <!-- Categories Tab -->
+      <app-admin-categories *ngIf="activeTab === 'categories'"></app-admin-categories>
+
+      <!-- Users Tab -->
+      <app-admin-users *ngIf="activeTab === 'users'"></app-admin-users>
+
+      <!-- Orders Tab -->
+      <app-admin-orders *ngIf="activeTab === 'orders'"></app-admin-orders>
+    </div>
+  </main>
+</div>

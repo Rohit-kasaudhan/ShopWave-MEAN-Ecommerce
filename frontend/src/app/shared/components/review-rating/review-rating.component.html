@@ -1,0 +1,81 @@
+<div class="review-container">
+  @if (!readOnly()) {
+    <div class="submit-review-section">
+      <h3>Write a Review</h3>
+      
+      <div class="star-rating">
+        @for (star of stars; track star) {
+          <svg 
+            (click)="setRating(star)"
+            (mouseenter)="setHover(star)"
+            (mouseleave)="setHover(0)"
+            [class.filled]="star <= (hoverRating() || newReview().rating)"
+            viewBox="0 0 24 24" 
+            fill="none" 
+            stroke="currentColor" 
+            stroke-width="2">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+          </svg>
+        }
+      </div>
+
+      <textarea 
+        [(ngModel)]="newReview().comment" 
+        placeholder="Share your thoughts about this product..."
+        rows="4">
+      </textarea>
+
+      <button 
+        class="submit-btn" 
+        [disabled]="newReview().rating === 0"
+        (click)="submitReview()">
+        Submit Review
+      </button>
+    </div>
+  }
+
+  <div class="reviews-list">
+    <h3>Customer Reviews ({{ reviews().length }})</h3>
+    <div class="average-rating">
+      <span class="rating-value">{{ averageRating() | number:'1.1-1' }}</span>
+      <span class="star-rating readonly">
+        @for (star of stars; track star) {
+          <svg 
+            [class.filled]="star <= averageRating()"
+            viewBox="0 0 24 24" 
+            fill="none" 
+            stroke="currentColor" 
+            stroke-width="2">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+          </svg>
+        }
+      </span>
+    </div>
+
+    @for (review of reviews(); track review) {
+      <div class="review-item">
+        <div class="review-header">
+          <div class="star-rating readonly small">
+            @for (star of stars; track star) {
+              <svg 
+                [class.filled]="star <= review.rating"
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="currentColor" 
+                stroke-width="2">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+              </svg>
+            }
+          </div>
+          <span class="user-name">{{ review.userName || 'Anonymous' }}</span>
+          @if (review.date) {
+            <span class="date">{{ review.date | date }}</span>
+          }
+        </div>
+        <p class="review-comment">{{ review.comment }}</p>
+      </div>
+    } @empty {
+      <p class="no-reviews">No reviews yet. Be the first to review this product!</p>
+    }
+  </div>
+</div>

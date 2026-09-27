@@ -1,0 +1,199 @@
+<div class="admin-section">
+  <!-- Controls & Header -->
+  <div class="section-header">
+    <div class="section-meta">
+      <span class="section-count">{{ filteredProducts.length }} of {{ products.length }} Products</span>
+    </div>
+
+    <div class="header-controls">
+      <div class="search-box">
+        <span class="material-icons search-icon">search</span>
+        <input
+          type="text"
+          placeholder="Search products..."
+          [(ngModel)]="searchQuery"
+          (ngModelChange)="applyFilter()"
+          class="search-input"
+        />
+      </div>
+
+      <select [(ngModel)]="selectedCategoryFilter" (ngModelChange)="applyFilter()" class="role-select">
+        <option value="all">All Categories</option>
+        <option *ngFor="let cat of categories" [value]="cat._id">{{ cat.name }}</option>
+      </select>
+
+      <select [(ngModel)]="selectedStockFilter" (ngModelChange)="applyFilter()" class="role-select">
+        <option value="all">All Stock Statuses</option>
+        <option value="in">In Stock (5+)</option>
+        <option value="low">Low Stock (< 5)</option>
+        <option value="out">Out of Stock (0)</option>
+      </select>
+
+      <button class="btn-create" (click)="openCreate()">
+        <span class="material-icons">add</span>
+        Add Product
+      </button>
+    </div>
+  </div>
+
+  <!-- Form Modal -->
+  <div class="form-overlay" *ngIf="showForm" (click)="closeForm()">
+    <div class="form-panel" (click)="$event.stopPropagation()">
+      <div class="form-header">
+        <h3>{{ editingProduct ? 'Edit Product' : 'New Product' }}</h3>
+        <button class="btn-close" (click)="closeForm()">
+          <span class="material-icons">close</span>
+        </button>
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="submit()" class="admin-form">
+        <div class="form-row-2">
+          <div class="form-group">
+            <label>Name *</label>
+            <input formControlName="name" placeholder="Product name" class="form-control"
+              [class.is-invalid]="form.get('name')?.invalid && form.get('name')?.touched" />
+            <div class="field-error" *ngIf="form.get('name')?.invalid && form.get('name')?.touched">
+              Name is required (max 100 chars)
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Category *</label>
+            <select formControlName="category" class="form-control">
+              <option value="">-- Select Category --</option>
+              <option *ngFor="let cat of categories" [value]="cat._id">{{ cat.name }}</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Description *</label>
+          <textarea formControlName="description" placeholder="Product description" class="form-control" rows="3"
+            [class.is-invalid]="form.get('description')?.invalid && form.get('description')?.touched"></textarea>
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label>Price ($) *</label>
+            <input type="number" formControlName="price" class="form-control" min="0" />
+          </div>
+          <div class="form-group">
+            <label>Stock *</label>
+            <input type="number" formControlName="stock" class="form-control" min="0" />
+          </div>
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label>Colors (comma separated)</label>
+            <input formControlName="colors" placeholder="red, blue, green" class="form-control" />
+          </div>
+          <div class="form-group">
+            <label>Sizes (comma separated)</label>
+            <input formControlName="sizes" placeholder="S, M, L, XL" class="form-control" />
+          </div>
+        </div>
+
+        <div class="form-group" *ngIf="!editingProduct">
+          <label>Images (max 4) *</label>
+          <div class="file-upload">
+            <span class="material-icons">cloud_upload</span>
+            <span>Click to upload images</span>
+            <input type="file" accept="image/*" multiple (change)="onFileChange($event)" />
+          </div>
+          <div class="file-preview" *ngIf="selectedFiles.length">
+            <span class="file-name" *ngFor="let f of selectedFiles">{{ f.name }}</span>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn-cancel" (click)="closeForm()">Cancel</button>
+          <button type="submit" class="btn-submit" [disabled]="isSubmitting">
+            <span class="spinner" *ngIf="isSubmitting"></span>
+            {{ editingProduct ? 'Save Changes' : 'Create Product' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Image Preview Dialog -->
+  <div class="form-overlay" *ngIf="previewProduct" (click)="closeImagePreview()">
+    <div class="form-panel preview-modal" (click)="$event.stopPropagation()">
+      <div class="form-header">
+        <h3>Product Gallery: {{ previewProduct.name }}</h3>
+        <button class="btn-close" (click)="closeImagePreview()">
+          <span class="material-icons">close</span>
+        </button>
+      </div>
+      <div class="gallery-body">
+        <div class="main-preview-box">
+          <img [src]="getMainImage(previewProduct)" [alt]="previewProduct.name" class="main-gallery-img" />
+        </div>
+        <div class="gallery-thumbs" *ngIf="previewProduct.images && previewProduct.images.length > 1">
+          <img *ngFor="let img of previewProduct.images" [src]="img.url" [alt]="previewProduct.name" class="thumb-img" />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div class="loading-state" *ngIf="isLoading">
+    <div class="spinner" style="width:40px;height:40px;border-width:3px"></div>
+  </div>
+
+  <!-- Products Table -->
+  <div class="table-wrapper" *ngIf="!isLoading">
+    <table class="admin-table" *ngIf="filteredProducts.length > 0">
+      <thead>
+        <tr>
+          <th>Image</th>
+          <th>Name</th>
+          <th>Category</th>
+          <th>Price</th>
+          <th>Stock</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let p of filteredProducts">
+          <td>
+            <img
+              [src]="getMainImage(p)"
+              [alt]="p.name"
+              class="table-img clickable-img"
+              (click)="openImagePreview(p)"
+              title="Click to expand gallery"
+            />
+          </td>
+          <td class="product-name-cell">
+            <span class="product-name-text">{{ p.name }}</span>
+            <div class="tags-row" *ngIf="p.colors?.length || p.sizes?.length">
+              <span class="tag-chip" *ngFor="let c of p.colors">{{ c }}</span>
+              <span class="size-chip" *ngFor="let s of p.sizes">{{ s }}</span>
+            </div>
+          </td>
+          <td><span class="badge">{{ getCategoryName(p.category) }}</span></td>
+          <td class="price-cell">${{ p.price | number:'1.2-2' }}</td>
+          <td>
+            <span class="stock-chip" [class.low]="p.stock < 5" [class.out]="p.stock === 0">
+              {{ p.stock === 0 ? 'Out of Stock' : (p.stock < 5 ? p.stock + ' Low' : p.stock) }}
+            </span>
+          </td>
+          <td class="actions-cell">
+            <button class="btn-edit" (click)="openEdit(p)" title="Edit">
+              <span class="material-icons">edit</span>
+            </button>
+            <button class="btn-delete" (click)="delete(p.uuid)" title="Delete">
+              <span class="material-icons">delete</span>
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="empty-state" *ngIf="filteredProducts.length === 0">
+      <span class="material-icons empty-icon">inventory_2</span>
+      <p>No products match current filters.</p>
+    </div>
+  </div>
+</div>

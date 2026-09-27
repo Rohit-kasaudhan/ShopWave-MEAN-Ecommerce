@@ -1,0 +1,861 @@
+/*
+ * styles.css — Global Design System for ShopWave E-Commerce
+ * Defines CSS custom properties (design tokens), reset rules, and
+ * utility classes used across the entire Angular application.
+ *
+ * Identity: Modern 2026 E-Commerce Brand Palette
+ * Primary: Sapphire Indigo (#3B82F6 / #1D4EDB)
+ * High-Converting CTA Accent: Electric Coral Red (#FF3366 / #E94560)
+ * Eco/Stock Mint: Emerald (#10B981) & Rating Gold (#F59E0B)
+ */
+
+/* ============================================================
+   1. CSS CUSTOM PROPERTIES (Design Tokens)
+   ============================================================ */
+/* ============================================================
+   1. CSS CUSTOM PROPERTIES (Design Tokens)
+   ============================================================ */
+:root,
+[data-theme='dark'] {
+  /* --- Dark Color Palette (Default Mood Mode) --- */
+  --color-bg-primary:     #0b0f19;   /* Deepest midnight obsidian */
+  --color-bg-secondary:   #131b2e;   /* Premium card background */
+  --color-bg-tertiary:    #1e293b;   /* Panel & component surface */
+  --color-bg-glass:       rgba(19, 27, 46, 0.65); /* Mirrormorphism surface */
+  --color-bg-glass-hover: rgba(30, 41, 59, 0.8);
+
+  /* Softened Conversion Accent — Rose Coral Blush (Less harsh, elegant) */
+  --color-accent:         #f43f5e;   /* Soft Rose Coral CTA */
+  --color-accent-light:   #fb7185;   /* Light Rose Blush for hover/gradients */
+  --color-accent-dark:    #e11d48;   /* Soft Crimson for pressed states */
+
+  /* Primary Brand — Sapphire Indigo */
+  --color-primary:        #3b82f6;   /* Primary brand color */
+  --color-primary-light:  #60a5fa;   /* Light primary for highlights */
+  --color-primary-dark:   #1d4ed8;   /* Dark primary */
+
+  --color-navy:           #1e293b;   /* Secondary brand slate navy */
+  --color-navy-light:     #334155;
+
+  --color-text-primary:   #f8fafc;   /* Main body text */
+  --color-text-secondary: #94a3b8;   /* Muted/secondary text */
+  --color-text-muted:     #64748b;   /* Subtitle / label text */
+  --color-text-inverse:   #0f172a;   /* Text on high contrast light surfaces */
+
+  --color-border:         rgba(255, 255, 255, 0.12);
+  --color-border-focus:   rgba(244, 63, 94, 0.4);
+  --color-border-input:   rgba(255, 255, 255, 0.15);
+
+  /* Status Colors */
+  --color-success:        #10b981;   /* Emerald Mint for In Stock / Success */
+  --color-error:          #f43f5e;   /* Soft Rose Error */
+  --color-warning:        #f59e0b;   /* Amber Gold for Ratings / Hot Deals */
+
+  /* Mirrormorphism Reflective Glass Tokens */
+  --glass-mirror-bg:        linear-gradient(135deg, rgba(255, 255, 255, 0.07) 0%, rgba(255, 255, 255, 0.02) 100%);
+  --glass-mirror-border:    1px solid rgba(255, 255, 255, 0.16);
+  --glass-mirror-highlight: inset 0 1px 1px 0 rgba(255, 255, 255, 0.25), inset 0 -1px 0 0 rgba(0, 0, 0, 0.2);
+  --glass-mirror-shadow:    0 12px 32px 0 rgba(0, 0, 0, 0.37);
+  --glass-mirror-blur:      blur(16px) saturate(180%);
+
+  /* Ambient Mesh Background Gradients */
+  --body-bg-grad1:        rgba(59, 130, 246, 0.15);
+  --body-bg-grad2:        rgba(244, 63, 94, 0.1);
+
+  --navbar-bg:            rgba(11, 15, 25, 0.75);
+  --navbar-bg-scrolled:   rgba(11, 15, 25, 0.92);
+
+  --input-bg:             rgba(255, 255, 255, 0.05);
+  --input-bg-hover:       rgba(255, 255, 255, 0.08);
+  --input-bg-focus:       rgba(255, 255, 255, 0.12);
+
+  /* Legacy & Cross-Theme Tokens Mapping */
+  --primary-color:        #60a5fa;
+  --bg-surface:           #131b2e;
+  --bg-input:             #1e293b;
+  --bg-muted:             #0b0f19;
+  --bg-hover:             rgba(255, 255, 255, 0.08);
+  --bg-disabled:          #334155;
+  --text-color:           #f8fafc;
+  --text-muted:           #94a3b8;
+  --border-color:         rgba(255, 255, 255, 0.1);
+  --danger-color:         #f43f5e;
+  --star-color:           #475569;
+  --star-filled:          #f59e0b;
+  --skeleton-base:        #1e293b;
+  --skeleton-highlight:   #334155;
+
+  /* --- Typography --- */
+  --font-heading:  'Outfit', system-ui, -apple-system, sans-serif;
+  --font-body:     'Inter', system-ui, -apple-system, sans-serif;
+
+  --text-xs:   0.75rem;
+  --text-sm:   0.875rem;
+  --text-base: 1rem;
+  --text-lg:   1.125rem;
+  --text-xl:   1.25rem;
+  --text-2xl:  1.5rem;
+  --text-3xl:  1.875rem;
+  --text-4xl:  2.25rem;
+
+  /* --- Spacing Scale --- */
+  --space-1:  0.25rem;
+  --space-2:  0.5rem;
+  --space-3:  0.75rem;
+  --space-4:  1rem;
+  --space-5:  1.25rem;
+  --space-6:  1.5rem;
+  --space-8:  2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+
+  /* --- Border Radius --- */
+  --radius-sm:  0.375rem;
+  --radius-md:  0.625rem;
+  --radius-lg:  1rem;
+  --radius-xl:  1.5rem;
+  --radius-2xl: 2rem;
+  --radius-full: 9999px;
+
+  /* --- Shadows & Glows --- */
+  --shadow-sm:     0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-md:     0 4px 20px rgba(0, 0, 0, 0.4);
+  --shadow-lg:     0 8px 40px rgba(0, 0, 0, 0.5);
+  --shadow-accent: 0 0 25px rgba(244, 63, 94, 0.25);
+  --shadow-card:   0 8px 32px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255,255,255,0.12);
+
+  /* --- Transitions --- */
+  --transition-fast:   150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-base:   250ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow:   400ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* --- Z-index layers --- */
+  --z-base:    1;
+  --z-dropdown: 100;
+  --z-modal:   200;
+  --z-toast:   300;
+}
+
+[data-theme='light'] {
+  /* --- Light Color Palette (Cloud Dancer Airy Slate) --- */
+  --color-bg-primary:     #f8fafc;   /* Soft slate canvas background */
+  --color-bg-secondary:   #ffffff;   /* Pure white cards and surfaces */
+  --color-bg-tertiary:    #f1f5f9;   /* Pearl gray panels */
+  --color-bg-glass:       rgba(255, 255, 255, 0.75); /* Frosty glass */
+  --color-bg-glass-hover: rgba(255, 255, 255, 0.9);
+
+  --color-accent:         #f43f5e;   /* Soft Rose Coral Accent */
+  --color-accent-light:   #fb7185;   /* Rose blush for light mode */
+  --color-accent-dark:    #e11d48;
+
+  --glass-mirror-bg:        linear-gradient(135deg, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.4) 100%);
+  --glass-mirror-border:    1px solid rgba(255, 255, 255, 0.8);
+  --glass-mirror-highlight: inset 0 1px 1px 0 rgba(255, 255, 255, 0.9), inset 0 -1px 0 0 rgba(0, 0, 0, 0.05);
+  --glass-mirror-shadow:    0 12px 32px 0 rgba(15, 23, 42, 0.08);
+
+  --color-primary:        #2563eb;   /* Sapphire blue */
+  --color-primary-light:  #3b82f6;
+  --color-primary-dark:   #1d4ed8;
+
+  --color-navy:           #2563eb;
+  --color-navy-light:     #3b82f6;
+
+  --color-text-primary:   #0f172a;   /* Rich slate 900 primary text */
+  --color-text-secondary: #475569;   /* Slate 600 secondary text */
+  --color-text-muted:     #64748b;   /* Slate 500 muted text */
+  --color-text-inverse:   #ffffff;
+
+  --color-border:         rgba(15, 23, 42, 0.08);
+  --color-border-focus:   rgba(244, 63, 94, 0.35);
+  --color-border-input:   rgba(15, 23, 42, 0.12);
+
+  --color-success:        #10b981;
+  --color-error:          #f43f5e;
+  --color-warning:        #f59e0b;
+
+  --body-bg-grad1:        rgba(219, 234, 254, 0.6);
+  --body-bg-grad2:        rgba(254, 205, 211, 0.5);
+
+  --navbar-bg:            rgba(255, 255, 255, 0.85);
+  --navbar-bg-scrolled:   rgba(255, 255, 255, 0.98);
+
+  --input-bg:             rgba(15, 23, 42, 0.03);
+  --input-bg-hover:       rgba(15, 23, 42, 0.06);
+  --input-bg-focus:       #ffffff;
+
+  --shadow-sm:     0 2px 8px rgba(15, 23, 42, 0.05);
+  --shadow-md:     0 4px 20px rgba(15, 23, 42, 0.08);
+  --shadow-lg:     0 12px 36px rgba(15, 23, 42, 0.12);
+  --shadow-accent: 0 0 25px rgba(255, 51, 102, 0.2);
+  --shadow-card:   0 8px 30px rgba(15, 23, 42, 0.06), inset 0 1px 0 rgba(255,255,255,0.9);
+
+  /* Legacy Mapping */
+  --primary-color:        #2563eb;
+  --bg-surface:           #ffffff;
+  --bg-input:             #ffffff;
+  --bg-muted:             #f1f5f9;
+  --bg-hover:             rgba(0, 0, 0, 0.04);
+  --bg-disabled:          #94a3b8;
+  --text-color:           #0f172a;
+  --text-muted:           #64748b;
+  --border-color:         #e2e8f0;
+  --danger-color:         #ef4444;
+  --star-color:           #cbd5e1;
+  --star-filled:          #f59e0b;
+  --skeleton-base:        #f1f5f9;
+  --skeleton-highlight:   #e2e8f0;
+}
+
+/* ============================================================
+   2. RESET & BASE STYLES
+   ============================================================ */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  /* Gradient background across the full app */
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-primary);
+  background-image:
+    radial-gradient(ellipse at 20% 20%, var(--body-bg-grad1) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 80%, var(--body-bg-grad2) 0%, transparent 50%);
+  background-attachment: fixed;
+  min-height: 100vh;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background-color var(--transition-base), color var(--transition-base);
+}
+
+/* ============================================================
+   3. TYPOGRAPHY UTILITIES
+   ============================================================ */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--color-text-primary);
+}
+
+a {
+  color: var(--color-accent-light);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+a:hover {
+  color: var(--color-accent);
+}
+
+/* ============================================================
+   4. FORM ELEMENTS — Shared across all auth pages
+   ============================================================ */
+
+/* Auth card container — glassmorphism effect */
+.auth-card {
+  background: var(--color-bg-glass);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-2xl);
+  padding: var(--space-10) var(--space-8);
+  box-shadow: var(--shadow-card);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Decorative glow behind card */
+.auth-card::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle at 30% 30%,
+    rgba(233, 69, 96, 0.05) 0%,
+    transparent 60%);
+  pointer-events: none;
+}
+
+/* Form field wrapper */
+.form-group {
+  margin-bottom: var(--space-5);
+  position: relative;
+}
+
+/* Labels */
+.form-label {
+  display: block;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-2);
+  letter-spacing: 0.02em;
+}
+
+/* Input fields */
+.form-control {
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  color: var(--color-text-primary);
+  background: var(--input-bg);
+  border: 1px solid var(--color-border-input);
+  border-radius: var(--radius-md);
+  outline: none;
+  transition:
+    border-color var(--transition-base),
+    background var(--transition-base),
+    box-shadow var(--transition-base);
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.form-control::placeholder {
+  color: var(--color-text-muted);
+}
+
+.form-control:hover {
+  background: var(--input-bg-hover);
+  border-color: rgba(233, 69, 96, 0.3);
+}
+
+.form-control:focus {
+  background: var(--input-bg-focus);
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px rgba(233, 69, 96, 0.15);
+}
+
+/* Input with left icon */
+.input-wrapper {
+  position: relative;
+}
+
+.input-wrapper .input-icon {
+  position: absolute;
+  left: var(--space-4);
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-text-muted);
+  font-size: 1.1rem;
+  pointer-events: none;
+  transition: color var(--transition-fast);
+}
+
+.input-wrapper .form-control {
+  padding-left: 2.75rem;
+}
+
+.input-wrapper:focus-within .input-icon {
+  color: var(--color-accent);
+}
+
+/* Password toggle icon (right side) */
+.input-wrapper .input-icon-right {
+  position: absolute;
+  right: var(--space-4);
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: color var(--transition-fast);
+  background: none;
+  border: none;
+  padding: 0;
+  display: flex;
+  align-items: center;
+}
+
+.input-wrapper .input-icon-right:hover {
+  color: var(--color-text-secondary);
+}
+
+/* When there's a right icon, add extra right padding to input */
+.input-wrapper.has-right-icon .form-control {
+  padding-right: 3rem;
+}
+
+/* Validation error messages */
+.field-error {
+  font-size: var(--text-xs);
+  color: var(--color-error);
+  margin-top: var(--space-1);
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  animation: slideDown 200ms ease;
+}
+
+.field-error .material-icons {
+  font-size: 0.875rem;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Invalid state styling */
+.form-control.is-invalid {
+  border-color: var(--color-error);
+  background: rgba(255, 77, 109, 0.04);
+}
+
+.form-control.is-invalid:focus {
+  box-shadow: 0 0 0 3px rgba(255, 77, 109, 0.12);
+}
+
+/* Valid state */
+.form-control.is-valid {
+  border-color: var(--color-success);
+}
+
+/* Select dropdown */
+select.form-control {
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23a0a0b8' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right var(--space-4) center;
+  padding-right: var(--space-10);
+}
+
+select.form-control option {
+  background-color: var(--color-bg-secondary);
+  color: var(--color-text-primary);
+}
+
+/* ============================================================
+   5. BUTTON STYLES
+   ============================================================ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-6);
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  font-weight: 600;
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition:
+    transform var(--transition-fast),
+    box-shadow var(--transition-base),
+    opacity var(--transition-fast);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+/* Primary button — coral-red gradient */
+.btn-primary {
+  background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-dark) 100%);
+  color: #fff;
+  box-shadow: 0 4px 15px rgba(233, 69, 96, 0.35);
+  width: 100%;
+  padding: var(--space-4) var(--space-6);
+  font-size: var(--text-lg);
+  border-radius: var(--radius-md);
+  margin-top: var(--space-2);
+}
+
+.btn-primary:not(:disabled):hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(233, 69, 96, 0.5);
+}
+
+.btn-primary:not(:disabled):active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(233, 69, 96, 0.3);
+}
+
+/* Ripple shimmer on primary button */
+.btn-primary::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
+  transform: translateX(-100%);
+  transition: transform 0.5s ease;
+}
+
+.btn-primary:not(:disabled):hover::after {
+  transform: translateX(100%);
+}
+
+/* Secondary / ghost button */
+.btn-secondary {
+  background: transparent;
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
+}
+
+.btn-secondary:hover {
+  background: var(--color-bg-glass-hover);
+  color: var(--color-text-primary);
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+/* ============================================================
+   6. AUTH LAYOUT — Full page center layout
+   ============================================================ */
+.auth-page {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr;
+  align-items: center;
+  justify-items: center;
+  padding: var(--space-6) var(--space-4);
+}
+
+@media (min-width: 768px) {
+  .auth-page {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-8);
+    padding: var(--space-8) var(--space-12);
+  }
+}
+
+@media (min-width: 1200px) {
+  .auth-page {
+    padding: var(--space-8) var(--space-16);
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+}
+
+/* ============================================================
+   7. MISC UTILITIES
+   ============================================================ */
+.text-center { text-align: center; }
+.text-sm     { font-size: var(--text-sm); }
+.text-xs     { font-size: var(--text-xs); }
+.text-muted  { color: var(--color-text-secondary); }
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  margin: var(--space-6) 0;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--color-border);
+}
+
+/* Loading spinner */
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  display: inline-block;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Alert / toast messages */
+.alert {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  animation: slideDown 250ms ease;
+  margin-bottom: var(--space-4);
+}
+
+.alert-error {
+  background: rgba(255, 77, 109, 0.12);
+  border: 1px solid rgba(255, 77, 109, 0.3);
+  color: #ff8fa3;
+}
+
+.alert-success {
+  background: rgba(0, 214, 143, 0.12);
+  border: 1px solid rgba(0, 214, 143, 0.3);
+  color: #00d68f;
+}
+
+.alert .material-icons {
+  font-size: 1.1rem;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+/* Two-column form grid */
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+}
+
+@media (max-width: 500px) {
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Auth branding panel — visible only on wider screens */
+.auth-brand {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .auth-brand {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: var(--space-6);
+    padding: var(--space-8);
+  }
+}
+
+/* OTP code input for email verification */
+.otp-group {
+  display: flex;
+  gap: var(--space-3);
+  justify-content: center;
+  margin: var(--space-6) 0;
+}
+
+.otp-input {
+  width: 52px;
+  height: 60px;
+  text-align: center;
+  font-size: var(--text-2xl);
+  font-weight: 700;
+  font-family: var(--font-heading);
+  color: var(--color-text-primary);
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px solid var(--color-border-input);
+  border-radius: var(--radius-md);
+  outline: none;
+  transition:
+    border-color var(--transition-base),
+    box-shadow var(--transition-base),
+    transform var(--transition-fast);
+  caret-color: var(--color-accent);
+}
+
+.otp-input:focus {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px rgba(233, 69, 96, 0.2);
+  transform: scale(1.05);
+}
+
+.otp-input.filled {
+  border-color: var(--color-accent);
+  background: rgba(233, 69, 96, 0.08);
+  color: var(--color-accent-light);
+}
+
+/* Password strength indicator */
+.password-strength {
+  margin-top: var(--space-2);
+  display: flex;
+  gap: var(--space-1);
+}
+
+.strength-bar {
+  height: 3px;
+  flex: 1;
+  border-radius: var(--radius-full);
+  background: var(--color-border);
+  transition: background var(--transition-base);
+}
+
+.strength-bar.active-weak   { background: var(--color-error); }
+.strength-bar.active-medium { background: var(--color-warning); }
+.strength-bar.active-strong { background: var(--color-success); }
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-bg-primary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* ============================================================
+   Mirrormorphism (Specular Glass Reflection) Utilities
+   ============================================================ */
+.mirror-card,
+.glass-mirror {
+  background: var(--glass-mirror-bg) !important;
+  backdrop-filter: var(--glass-mirror-blur);
+  -webkit-backdrop-filter: var(--glass-mirror-blur);
+  border: var(--glass-mirror-border) !important;
+  box-shadow: var(--glass-mirror-shadow), var(--glass-mirror-highlight) !important;
+  position: relative;
+  overflow: hidden;
+}
+
+.mirror-card::before,
+.glass-mirror::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 200%;
+  height: 100%;
+  background: linear-gradient(
+    115deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.03) 40%,
+    rgba(255, 255, 255, 0.15) 50%,
+    rgba(255, 255, 255, 0.03) 60%,
+    transparent 100%
+  );
+  pointer-events: none;
+  transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: translateX(-50%);
+}
+
+.mirror-card:hover::before,
+.glass-mirror:hover::before {
+  transform: translateX(100%);
+}
+
+/* ============================================================
+   ADMIN DEMO CREDENTIALS CALLOUT
+   ============================================================ */
+.admin-hint-card {
+  margin-top: var(--space-5);
+  padding: var(--space-4);
+  background: rgba(59, 130, 246, 0.08);
+  border: 1px dashed rgba(59, 130, 246, 0.35);
+  border-radius: var(--radius-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  text-align: left;
+  transition: all var(--transition-base);
+}
+
+.admin-hint-card:hover {
+  background: rgba(59, 130, 246, 0.12);
+  border-color: rgba(59, 130, 246, 0.5);
+}
+
+.admin-hint-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-primary-light);
+  font-weight: 600;
+  font-size: var(--text-sm);
+}
+
+.admin-hint-icon {
+  font-size: 1.2rem;
+  color: var(--color-primary-light);
+}
+
+.admin-hint-credentials {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-top: 2px;
+}
+
+.credential-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  font-size: var(--text-xs);
+}
+
+.credential-label {
+  color: var(--color-text-secondary);
+  font-weight: 500;
+}
+
+.credential-value {
+  background: rgba(0, 0, 0, 0.35);
+  color: #93c5fd;
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+  font-family: monospace;
+  font-size: var(--text-xs);
+  border: 1px solid rgba(59, 130, 246, 0.25);
+  letter-spacing: 0.03em;
+  user-select: all;
+}
+
+.btn-fill-admin {
+  margin-top: var(--space-2);
+  padding: 7px 12px;
+  background: rgba(59, 130, 246, 0.15);
+  color: var(--color-primary-light);
+  border: 1px solid rgba(59, 130, 246, 0.35);
+  border-radius: var(--radius-md);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  transition: all var(--transition-fast);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.btn-fill-admin:hover {
+  background: rgba(59, 130, 246, 0.25);
+  border-color: var(--color-primary);
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+.btn-fill-admin .material-icons {
+  font-size: 1rem;
+}
+
+
