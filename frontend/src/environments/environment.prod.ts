@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://your-production-domain.com/api/v1',
+  apiUrl: 'https://shopwave-mean-ecommerce.onrender.com/api/v1',
 };
